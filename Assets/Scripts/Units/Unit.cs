@@ -14,7 +14,6 @@ public class Unit : MonoBehaviour
         Neutral      // 중립 진영
 
     }
-
     public enum UnitType
     {
         Melee,       // 보병
@@ -40,6 +39,15 @@ public class Unit : MonoBehaviour
     {
         GameObject gameObject = this.gameObject;
     }
+    public void Damaged(int damage)
+    {
+        // 유닛이 피해를 입었을 때의 처리
+        health -= damage;
+        if (health <= 0)
+        {
+            Die();
+        }
+    }
     public void Die()
     {
         // 유닛이 죽었을 때의 처리
@@ -59,18 +67,5 @@ public class Unit : MonoBehaviour
 
     }
 
-    public class StatusEffect
-    {
-        protected int duration;
-        protected GameObject target;
-        protected int turnCount = 0; // 상태 효과가 적용된 턴 수
-
-        public StatusEffect(int duration, GameObject target)
-        {
-            this.duration = duration;
-            this.target = target;
-        }
-
-    }
 
 }

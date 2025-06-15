@@ -11,12 +11,12 @@ public class UnitMover : MonoBehaviour
         Debug.Log("이동 대상 지역 선택 대기 중");
         // UI에 이동 가능 영역 표시
     }
-    private void MoveUnitToArea(Unit unit, Area targetArea)
+    private void MoveFriendlyUnitToArea(Unit unit, Area targetArea)
     {
-        unit.area.occupyingUnit = null;
+        unit.area.occupyingFriendlyUnit = null;
         unit.transform.position = targetArea.transform.position;
         unit.area = targetArea;
-        targetArea.occupyingUnit = unit;
+        targetArea.occupyingFriendlyUnit = unit;
 
         UnitSelector.Instance.CancelSelection();
         BattleManager.Instance.SetState(BattleManager.States.UnitSelection);

@@ -1,8 +1,11 @@
 using System;
+using System.Collections.Generic;
 using UnityEngine;
 
 public class AreaManager : MonoBehaviour
 {
+    public static AreaManager Instance { get; private set; }
+    public List<Area> allAreas = new List<Area>();
     [SerializeField] private Transform areaParent; // 전체 영역의 부모
 
     private IArea[,] areaGrid; // 2차원 배열로 관리
@@ -11,6 +14,7 @@ public class AreaManager : MonoBehaviour
 
     private void Awake()
     {
+        AreaManager instance = this;
         areaGrid = new Area[width, height];
         InitializeArea();
     }
@@ -19,31 +23,9 @@ public class AreaManager : MonoBehaviour
     {
         SetArea(areaParent);
     }
-    private void SetAreaCondition(Area area)
-    {
-        if (area.isOccupied)
-        {
-            switch (area.occupyingUnit.faction)
-            {
-                case Unit.Faction.Friendly:
-                    area.areaCondition = AreaCondition.FriendlyOccupied;
-                    break;
-                case Unit.Faction.Enemy:
-                    area.areaCondition = AreaCondition.EnemyOccupied;
-                    break;
-                default:
-                    area.areaCondition = AreaCondition.NeutralOccupied;
-                    break;
-            }
-            
-        }
-        if (!area.isOccupied)
-        {
-            area.areaCondition = AreaCondition.Empty;
-        }
-    }
     private void SetArea(Transform parent)
     {
+
         foreach (Transform child in parent)
         {
             Area area = child.GetComponent<Area>();
@@ -74,7 +56,7 @@ public class AreaManager : MonoBehaviour
                     }
 
                     areaGrid[x, y] = area;
-
+                    allAreas.Add(area); // 모든 Area 수집
                     Debug.Log($"[SetArea] {child.name} 등록: 좌표 [{x},{y}], 타입: {area.areaType}");
                 }
                 else
