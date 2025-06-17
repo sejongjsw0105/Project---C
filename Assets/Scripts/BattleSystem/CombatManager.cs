@@ -1,11 +1,13 @@
 using UnityEngine;
 
+
 public class CombatManager : MonoBehaviour
 {
+    public static CombatManager Instance;
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
-        
+        Instance = this;
     }
 
     // Update is called once per frame
@@ -13,42 +15,47 @@ public class CombatManager : MonoBehaviour
     {
         
     }
-    void Combat()
+    public void Combat()
     {
-        // 전투 로직 구현
-        // 예: 유닛 간의 공격, 피해 계산 등
-        AreaManager.Instance.allAreas.ForEach(area =>
-        {
-            if (area.areaCondition == AreaCondition.InCombat)
-            {
-                Unit friendlyUnit = area.occupyingFriendlyUnit;
-                Unit enemyUnit = area.occupyingEnemyUnit;
-                if (friendlyUnit != null && enemyUnit != null)
-                {
-                    // 공격력과 방어력 계산
-                    int damageToEnemy = Mathf.Max(0, friendlyUnit.attackPower - enemyUnit.defensePower);
-                    int damageToFriendly = Mathf.Max(0, enemyUnit.attackPower - friendlyUnit.defensePower);
-                    // 피해 적용
-                    enemyUnit.health -= damageToEnemy;
-                    friendlyUnit.health -= damageToFriendly;
-                    Debug.Log($"{friendlyUnit.unitName}이 {enemyUnit.unitName}에게 {damageToEnemy}의 피해를 입혔습니다.");
-                    Debug.Log($"{enemyUnit.unitName}이 {friendlyUnit.unitName}에게 {damageToFriendly}의 피해를 입혔습니다.");
-                    // 유닛 사망 처리
-                    if (enemyUnit.health <= 0)
-                    {
-                        enemyUnit.Die();
-                        area.occupyingEnemyUnit = null; // 영역에서 제거
-                        Debug.Log($"{enemyUnit.unitName}이 사망했습니다.");
-                    }
-                    if (friendlyUnit.health <= 0)
-                    {
-                        friendlyUnit.Die();
-                        area.occupyingFriendlyUnit = null; // 영역에서 제거
-                        Debug.Log($"{friendlyUnit.unitName}이 사망했습니다.");
-                    }
-                }
-            }
-        });
         Debug.Log("전투가 시작되었습니다.");
+
+        foreach (var area in AreaManager.Instance.allAreas)
+        {
+            if (area.areaCondition != AreaCondition.InCombat) continue;
+            Unit firstAttacker = area.firstAttacker;
+            Unit secondAttacker = area.secondAttacker;
+            int damageToSecond = 0;
+            int damageToFirst = 0;
+
+            if (secondAttacker == null) continue;
+
+            // ① 공격 전 훅
+            if (firstAttacker.isAttackable){
+                
+                damageToSecond = firstAttacker.PrepareAttack(secondAttacker, firstAttacker.attackPower);
+                firstAttacker.Damaged(secondAttacker, Unit.DamageType.Damage, damageToSecond);
+                firstAttacker.AfterAttack(secondAttacker, damageToSecond);
+
+            }
+            if (secondAttacker.isAttackable)
+            {
+                damageToFirst = secondAttacker.PrepareAttack(firstAttacker, secondAttacker.attackPower);
+                firstAttacker.Damaged(secondAttacker, Unit.DamageType.Damage, damageToFirst);
+                secondAttacker.AfterAttack(firstAttacker, damageToFirst);
+            }
+                
+            
+            
+            // ④ 사망 처리 → Die() 내부에서 UnitManager, UI, 이펙트 처리됨
+            if (firstAttacker.health <= 0)
+            {
+               firstAttacker.Die(); // 꼭 이걸로!
+            }
+
+            if (secondAttacker.health <= 0)
+            {
+                secondAttacker.Die();
+            }
+        }
     }
 }

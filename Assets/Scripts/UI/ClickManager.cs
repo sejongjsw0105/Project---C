@@ -22,7 +22,31 @@ public class ClickManager : MonoBehaviour
             CancelAllSelections();
         }
     }
+    public void HandleActionButtonClick(Action action)
+    {
+        if (BattleManager.Instance.currentState != BattleManager.States.ActionSelection)
+        {
+            Debug.LogWarning("지금은 행동을 선택할 수 없습니다.");
+            return;
+        }
+        int cost = BattleManager.Instance.GetActionCost(action);
+        if (!BattleManager.Instance.TrySpendCommandPoints(cost))
+            return;
+    ActionSelector.Instance.OnActionClicked(action);
+    }
 
+    public void HandleTurnEndButtonClick()
+    {
+        if (BattleManager.Instance.currentState == BattleManager.States.ActionSelection )
+        {
+            Debug.Log("턴 종료 버튼 클릭됨");
+            BattleManager.Instance.SetState(BattleManager.States.TurnEnd);
+        }
+        else
+        {
+            Debug.LogWarning("현재 상태에서는 턴을 종료할 수 없습니다.");
+        }
+    }
     private void HandleLeftClick()
     {
         Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
@@ -64,7 +88,7 @@ public class ClickManager : MonoBehaviour
         ActionSelector.Instance.CancelSelection();
         BattleManager.Instance.currentUnit = null;
         BattleManager.Instance.currentArea = null;
-        BattleManager.Instance.currentAction = Action.None;
+        BattleManager.Instance.SetCurrentAction(Action.None);
         Debug.Log("선택 모두 취소됨");
     }
 }

@@ -25,7 +25,7 @@ public class ActionSelector : MonoBehaviour
                 }
                 else
                 {
-                    BattleManager.Instance.currentAction = action;
+                    BattleManager.Instance.SetCurrentAction(action);
                     Debug.Log($"{action} 선택됨");
                     ProcessAction();
                 }
@@ -42,7 +42,7 @@ public class ActionSelector : MonoBehaviour
 
     public void CancelSelection()
     {
-        BattleManager.Instance.currentAction = Action.None;
+        BattleManager.Instance.SetCurrentAction(Action.None);
         Debug.Log("지역 선택 해제");
     }
 

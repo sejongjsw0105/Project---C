@@ -42,7 +42,10 @@ public class AreaSelector : MonoBehaviour
                 BattleManager.Instance.SetState(BattleManager.States.UnitMove);
                 break;
             case Action.Support:
-                BattleManager.Instance.SetState(BattleManager.States.UnitAction);
+                BattleManager.Instance.SetState(BattleManager.States.UnitSupport);
+                break;
+            case Action.Defend:
+                BattleManager.Instance.SetState(BattleManager.States.UnitDefend);
                 break;
         }
     }

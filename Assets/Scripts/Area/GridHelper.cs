@@ -14,51 +14,62 @@ public class GridHelper : MonoBehaviour
         }
         Instance = this;
     }
-
-    public bool IsMoveAllowed(Area from, Area to)
+    public bool isSide(Area from, Area to)
     {
         int dx = Mathf.Abs(from.areaIndexX - to.areaIndexX);
+        if (dx != 0) return true; // x축이 있으면 측면
+        else return false;
+    }
+    public bool IsFriendlyMoveAllowed(Area from, Area to, int moveRange = 1)
+    {
+        // 대상 칸이 이미 점령됨 → 불가
+        if (to.occupyingFriendlyUnit != null)
+            return false;
+
+        int dx = Mathf.Abs(from.areaIndexX - to.areaIndexX);
         int dy = Mathf.Abs(from.areaIndexY - to.areaIndexY);
-        if (from.areaType != AreaType.FriendlyFinal && from.areaType != AreaType.EnemyFinal)
+
+        // 최후방 → 후방 이동은 자유 (단, moveRange 이하)
+        if (from.areaType == AreaType.FriendlyFinal)
         {
-            if (dx > 0) return false;
-        }
-        else
-        {
-            if (dx > 1) return false; // 최종 지역에서 한 칸 이상 이동 불가
+            return to.areaType == AreaType.FriendlyRear && dx <= moveRange;
         }
 
-        if (from.areaType == AreaType.FriendlyFinal && to.areaType == AreaType.FriendlyRear)
-            return !to.isOccupied;
-
-        if ((from.areaType == AreaType.FriendlyRear || from.areaType == AreaType.Frontline) &&
-            dy == 1 && dx == 0)
-            return !to.isOccupied;
+        // 후방 또는 전방 → 위/아래 한 칸 이동만 허용
+        if (from.areaType == AreaType.FriendlyRear || from.areaType == AreaType.Frontline)
+        {
+            return dx == 0 && dy == 1;
+        }
 
         return false;
     }
-    public bool IsSupportAllowed(Area from, Area to, Unit.Support support)
+    public bool IsEnemyMoveAllowed(Area from, Area to, int moveRange = 1)
+    {
+        // 대상 칸이 이미 점령됨 → 불가
+        if (to.occupyingEnemyUnit != null)
+            return false;
+        int dx = Mathf.Abs(from.areaIndexX - to.areaIndexX);
+        int dy = Mathf.Abs(from.areaIndexY - to.areaIndexY);
+        // 최후방 → 후방 이동은 자유 (단, moveRange 이하)
+        if (from.areaType == AreaType.EnemyFinal)
+        {
+            return to.areaType == AreaType.EnemyRear && dx <= moveRange;
+        }
+        // 후방 또는 전방 → 위/아래 한 칸 이동만 허용
+        if (from.areaType == AreaType.EnemyRear || from.areaType == AreaType.Frontline)
+        {
+            return dx == 0 && dy == 1;
+        }
+        return false;
+    }
+
+    public bool IsInRange(Area from, Area to, int range)
     {
         int dx = Mathf.Abs(from.areaIndexX - to.areaIndexX);
         int dy = Mathf.Abs(from.areaIndexY - to.areaIndexY);
-        if (dx > support.supportRange || dy > support.supportRange) return false; // 범위 초과
-        if (support.areacond != to.areaCondition) return false;
-        return true; // 지원 가능
-
-
-
+        return (dx + dy) <= range;
     }
 
-    // Start is called before the first frame update
-    void Start()
-    {
-        // 초기화 로직이 있다면 여기에 작성
-    }
 
-    // Update is called once per frame
-    void Update()
-    {
-        // 매 프레임 수행할 작업이 있다면 여기에 작성
-    }
 }
 

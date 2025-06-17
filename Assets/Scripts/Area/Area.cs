@@ -1,15 +1,6 @@
 using System;
-using Mono.Cecil;
+using System.Collections.Generic;
 using UnityEngine;
-
-public interface IArea
-{
-    Tuple<int,int> GetPosition();
-}
-public interface IAreaClickable
-{
-    void OnAreaClicked(Area area);
-}
 
 public enum AreaCondition
 {
@@ -28,21 +19,25 @@ public enum AreaType
     EnemyFinal       // 적 최후방 (1칸)
 }
 
-public class Area : MonoBehaviour, IArea
+public class Area : MonoBehaviour
 {
+    public Unit firstAttacker;  // 새로 이동해온 유닛
+    public Unit secondAttacker;
     public int areaIndexX;
     public int areaIndexY;
     public AreaType areaType;          // 영역의 타입
     public Unit occupyingFriendlyUnit;         // 현재 유닛
     public Unit occupyingEnemyUnit;         // 현재 영역을 점령하고 있는 유닛
-    public bool isOccupied => occupyingFriendlyUnit != null || occupyingEnemyUnit != null; // 영역이 점령되었는지 여부
     public AreaCondition areaCondition; // 영역의 상태
+    public List<StatusEffect> statusEffects = new List<StatusEffect>();
     public Tuple<int, int> GetPosition()
     {
         return Tuple.Create(areaIndexX, areaIndexY);
     }
-    public void SetAreaCondition(Unit unit1, Unit unit2)
+    public void SetAreaCondition()
     {
+        Unit unit1 = occupyingFriendlyUnit;
+        Unit unit2 = occupyingEnemyUnit;
         if (unit1 != null && unit2 != null)
         {
             areaCondition = AreaCondition.InCombat; // 두 유닛이 모두 존재하면 전투 중
@@ -61,4 +56,27 @@ public class Area : MonoBehaviour, IArea
         }
 
     }
+    public void AddStatusEffect(StatusEffect effect)
+    {
+        statusEffects.Add(effect);
+        effect.OnApply(null, this); // 상태 효과 적용
+    }
+    //상태이상 턴마다, 제거시
+    public void UpdateStatusEffects()
+    {
+        for (int i = statusEffects.Count - 1; i >= 0; i--)
+        {
+            StatusEffect effect = statusEffects[i];
+
+            effect.OnUpdate(null, this);       //  1. 턴 중 효과 적용
+            effect.duration--;           //  2. 턴 종료 시 duration 감소
+
+            if (effect.duration <= 0)
+            {
+                effect.OnExpire(null, this);   //  3. 만료 시 해제
+                statusEffects.RemoveAt(i);
+            }
+        }
+    }
+
 }

@@ -9,7 +9,7 @@ public class ActionManager : MonoBehaviour
     public void Start()
     {
         // 초기 상태 설정
-        BattleManager.Instance.currentAction = Action.None;
+        BattleManager.Instance.SetCurrentAction(Action.None);
     }
 
     public void ProcessAction(Unit selectedUnit)

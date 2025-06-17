@@ -22,6 +22,11 @@ public class UnitSelector : MonoBehaviour
                     CancelSelection();
                     return;
                 }
+                if (BattleManager.Instance.currentAction == Action.Support &&unit.GetSupport() == null)
+                {
+                    Debug.LogWarning("이 유닛은 지원 행동을 사용할 수 없습니다.");
+                    return;
+                }
                 else
                 {
                     BattleManager.Instance.currentUnit = unit;
@@ -47,7 +52,7 @@ public class UnitSelector : MonoBehaviour
                 break;
 
             case Action.Defend:
-                BattleManager.Instance.SetState(BattleManager.States.UnitAction);
+                BattleManager.Instance.SetState(BattleManager.States.UnitDefend);
                 break;
         }
     }
