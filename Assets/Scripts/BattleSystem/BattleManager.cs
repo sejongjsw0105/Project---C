@@ -37,16 +37,15 @@ public class BattleManager : MonoBehaviour
                 turnCount = 0; // 턴 수 초기화
                 AreaManager.Instance.ClearAllAreas();
                 AreaManager.Instance.InitializeArea();
+                foreach(Unit unit in UnitManager.Instance.allUnits){
+                    unit.BeginBattle();
+                }
 
                 break;
             case States.TurnStart:
-
-                turnCount++; // 턴 수 증가
-                if (turnCount > maxTurnCount)
+                foreach (Unit unit in UnitManager.Instance.allUnits)
                 {
-                    battleEndReason = BattleEndReason.TurnLimitReached;
-                    SetState(States.BattleEnd);
-                    return;
+                    unit.BeginTurn(); // 각 유닛의 턴 시작 처리
                 }
                 currentCommandPoints = maxCommandPointsPerTurn;
                 break;
@@ -60,8 +59,7 @@ public class BattleManager : MonoBehaviour
                 AreaSelector.Instance.BeginSelection();
                 break;
             case States.UnitMove:
-                UnitMover.Instance.PrepareMove();
-                UnitMover.Instance.MoveFriendlyUnitToArea(currentUnit, currentArea);
+                currentUnit.DoMove(currentArea); // 현재 유닛을 선택된 지역으로 이동
                 break;
             case States.UnitSupport:
                 Debug.Log("유닛 지원 행동 처리");
@@ -87,9 +85,20 @@ public class BattleManager : MonoBehaviour
                     unit.UpdateStatusEffects(); // 모든 유닛의 상태 효과 업데이트
                 }
                 CheckVictoryCondition();
+                turnCount++; // 턴 수 증가
+                if (turnCount > maxTurnCount)
+                {
+                    battleEndReason = BattleEndReason.TurnLimitReached;
+                    SetState(States.BattleEnd);
+                    return;
+                }
                 SetState(States.TurnStart);
                 break;
             case States.BattleEnd:
+                foreach (Unit unit in UnitManager.Instance.allUnits)
+                {
+                    unit.stats.currentHealth = unit.health; // 전투 종료 시 유닛의 현재 체력을 영구 정보에 저장
+                }
                 break;
         }
     }
@@ -132,6 +141,14 @@ public class BattleManager : MonoBehaviour
     public void SpendCommandPoints(int amount)
     {
         currentCommandPoints -= amount;
+    }
+    public void RefundCommandPoints(int amount)
+    {
+        currentCommandPoints += amount;
+        if (currentCommandPoints > maxCommandPointsPerTurn)
+        {
+            currentCommandPoints = maxCommandPointsPerTurn; // 최대 전령 수 초과 방지
+        }
     }
     public int GetActionCost(Action action)
     {

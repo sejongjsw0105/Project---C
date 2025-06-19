@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 using static Unit;
 public enum StackType
@@ -9,12 +10,16 @@ public enum StackType
 }
 public enum StatusEffectType
 {
-    Stunned,
-    Immune,
+    Covered, 
+    Defeated, 
+    VisionLess,
+    Boosted,
+    Protected,
     SideExposed,
     OnFire,
     Defend,
     Reloading,
+    Chaos,
     // 필요에 따라 추가
 }
 public abstract class StatusEffect
@@ -50,16 +55,15 @@ public abstract class StatusEffect
         Debug.Log($"[{type}] 상태 효과 만료됨: {target.unitName}, 지속 시간: {duration}턴, 값: {value} {(buff ? "버프" : "디버프")}");
         // 상태 효과가 만료되면 추가적인 로직이 필요할 경우 여기에 작성
     }
-    public virtual int OnBeforeDamage(Unit from,  Unit target, DamageType damageType, int damage) => damage;
-    public virtual void OnAfterDamage(Unit from, Unit target, DamageType damageType, int damage) {}
-    public virtual int OnBeforeAttack(Unit attacker, Unit target, int damage) { return damage; }
+    public virtual (int,bool) OnBeforeDamaged(Unit from, Unit target, DamageType damageType, int damage) { return (damage,true); }
+    public virtual void OnAfterDamaged(Unit from, Unit target, DamageType damageType, int damage) {}
+    public virtual (int, bool) OnBeforeAttack(Unit attacker, Unit target, int damage) { return (damage,true); }
     public virtual void OnAfterAttack(Unit attacker, Unit target, int damage) { }
-    public virtual int OnBeforeSupport(Unit supporter, Area area) { return 0; }
-    public virtual void OnAfterSupport(Unit supporter, Area area) { }
-    public virtual int OnBeforeMove(Unit unit, Area target) => 0;
+    public virtual (int, bool) OnBeforeSupport(Unit supporter, Area area, int value) { return (value,true); }
+    public virtual void OnAfterSupport(Unit supporter, Area area, int value) { }
+    public virtual (int,bool) OnBeforeMove(Unit unit, Area target, int moveRange) { return (moveRange,true); }
     public virtual void OnAfterMove(Unit unit, Area target)
-    {
-        // 이동 후 처리할 로직이 있다면 여기에 작성
-    }
-
+    {    }
+    public virtual int OnBeforeDefend(Unit unit) => 0;
+    public virtual void OnDie(Unit unit) { }
 }

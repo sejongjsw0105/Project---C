@@ -6,13 +6,11 @@ public class Fire : UnitTrait
     public Fire()
     {
         type = UnitTraitType.Fire;
-        unitTypes = new List<Unit.UnitType> { Unit.UnitType.Ranged, Unit.UnitType.RangedCavalry, Unit.UnitType.Melee };
-        TraitId = 1; // 예시로 1번 Trait ID를 사용
+        unitTypes = new List<Unit.UnitType> { Unit.UnitType.Ranged, Unit.UnitType.RangedCavalry};
     }
-    public override int OnBeforeSupport(Unit supporter, Area area)
+    public override void OnAfterSupport(Unit supporter, Area area, int value)
     {
-        area.AddStatusEffect(new OnFire(supporter.attackPower,1));
-        return base.OnBeforeSupport(supporter, area);
+        area.AddStatusEffect(new OnFire((int)(supporter.attackPower*0.5),4));
     }
 
 }

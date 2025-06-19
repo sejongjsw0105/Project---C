@@ -7,8 +7,8 @@ public class SideExposed : StatusEffect
     {
         // 필요하면 추가 초기화
     }
-    public override int OnBeforeDamage(Unit from, Unit target, Unit.DamageType damageType, int damage)
+    public override (int,bool) OnBeforeDamaged(Unit from, Unit target, Unit.DamageType damageType, int damage)
     {
-        return (int)(damage * 1.5);
+        return ((int)(damage * 1.5), true);
     }
 }

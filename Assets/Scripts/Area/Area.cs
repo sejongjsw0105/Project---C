@@ -56,27 +56,70 @@ public class Area : MonoBehaviour
         }
 
     }
-    public void AddStatusEffect(StatusEffect effect)
+    public virtual void AddStatusEffect(StatusEffect newEffect)
     {
-        statusEffects.Add(effect);
-        effect.OnApply(null, this); // 상태 효과 적용
+        newEffect.OnApply(null,this); // 상태 효과 적용
+        var existing = statusEffects.Find(e => e.type == newEffect.type);
+
+        if (existing != null)
+        {
+            HandleExistingStatusEffect(existing, newEffect);
+        }
+        else
+        {
+            AddNewStatusEffect(newEffect);
+        }
+    }
+
+    private void HandleExistingStatusEffect(StatusEffect existing, StatusEffect newEffect)
+    {
+        switch (newEffect.stackType)
+        {
+            case StackType.duration:
+                existing.duration += newEffect.duration;
+                statusEffects.Remove(existing); // 기존 효과를 제거하여 중복 방지
+                AddNewStatusEffect(existing); // 새로운 효과를 추가하여 로그 출력                
+                Debug.Log($"[{newEffect.type}] 지속시간이 중첩되었습니다. 총 {existing.duration}턴");
+                break;
+            case StackType.value:
+                existing.value += newEffect.value;
+                statusEffects.Remove(existing); // 기존 효과를 제거하여 중복 방지
+                AddNewStatusEffect(existing); // 새로운 효과를 추가하여 로그 출력 
+                Debug.Log($"[{newEffect.type}] 효과값이 중첩되었습니다. 총 value: {existing.value}");
+                break;
+            case StackType.count:
+                existing.count += newEffect.count;
+                statusEffects.Remove(existing); // 기존 효과를 제거하여 중복 방지
+                AddNewStatusEffect(existing); // 새로운 효과를 추가하여 로그 출력 
+                Debug.Log($"[{newEffect.type}] 사용 횟수가 중첩되었습니다. 총 count: {existing.count}");
+                break;
+            case StackType.none:
+                break;
+        }
+    }
+
+    private void AddNewStatusEffect(StatusEffect newEffect)
+    {
+        statusEffects.Add(newEffect);
     }
     //상태이상 턴마다, 제거시
     public void UpdateStatusEffects()
     {
         for (int i = statusEffects.Count - 1; i >= 0; i--)
         {
-            StatusEffect effect = statusEffects[i];
-
-            effect.OnUpdate(null, this);       //  1. 턴 중 효과 적용
-            effect.duration--;           //  2. 턴 종료 시 duration 감소
+            var effect = statusEffects[i];
+            effect.OnUpdate(null,this); // 상태 효과 업데이트
+            if (effect.duration > 0)
+                effect.duration--;
 
             if (effect.duration <= 0)
-            {
-                effect.OnExpire(null, this);   //  3. 만료 시 해제
-                statusEffects.RemoveAt(i);
-            }
+                RemoveExpiredEffect(effect); // index 없이 제거
         }
+    }
+    public void RemoveExpiredEffect(StatusEffect effect)
+    {
+        effect.OnExpire(null, this);
+        statusEffects.Remove(effect);
     }
 
 }

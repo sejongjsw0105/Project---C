@@ -7,8 +7,6 @@ public class Defending : StatusEffect
     public Defending(int duration, int value)
         : base(StatusEffectType.Defend, StackType.value, true, value,duration,1000)
     {
-        // value: 방어력 상승치 == 쉴드 초기값
-        this.Shield = value;
     }
 
     public override void OnApply(Unit target, Area area)
@@ -18,15 +16,19 @@ public class Defending : StatusEffect
         Debug.Log($"[Defend] {target.unitName}의 방어력이 {value} 증가했습니다. (현재 방어력: {target.defensePower})");
     }
 
-    public override int OnBeforeDamage(Unit from, Unit target, Unit.DamageType damageType, int incomingDamage)
+    public override (int,bool) OnBeforeDamaged(Unit from, Unit target, Unit.DamageType damageType, int incomingDamage)
     {
         int absorbed = Mathf.Min(Shield, incomingDamage);
         Shield -= absorbed;
         int result = incomingDamage - absorbed;
 
         Debug.Log($"[Defend] {target.unitName}의 방어막이 {absorbed} 피해를 흡수했습니다. (남은 방어막: {Shield})");
+        if (Shield <= 0)
+        {
+            target.RemoveExpiredEffect(this); // 방어막이 0 이하가 되면 효과 제거
 
-        return result;
+        }
+        return (result,true);
     }
 
     public override void OnExpire(Unit target, Area area)

@@ -22,9 +22,9 @@ public class OnFire : StatusEffect
         else if (area != null)
         {
             if (area.occupyingEnemyUnit != null)
-                area.occupyingEnemyUnit.AddStatusEffect(new OnFire(value, 1));
+                area.occupyingEnemyUnit.AddStatusEffect(new OnFire(value, 2));
             if (area.occupyingFriendlyUnit != null)
-                area.occupyingFriendlyUnit.AddStatusEffect(new OnFire(value, 1));
+                area.occupyingFriendlyUnit.AddStatusEffect(new OnFire(value, 2));
         }
         else {
             Debug.LogWarning("OnFire effect applied without a target or area. This should not happen.");

@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using Unity.VisualScripting;
 using UnityEngine;
+using static UnityEngine.GraphicsBuffer;
 using static UnityEngine.UI.GridLayoutGroup;
 
 public abstract class Unit : MonoBehaviour
@@ -25,30 +26,70 @@ public abstract class Unit : MonoBehaviour
         Ranged,         // 원거리  
         RangedCavalry,   // 원거리 기병  
     }
-
+    public class UnitStats
+    {
+        public int maxHealth;
+        public int currentHealth;
+        public int attackPower;
+        public int defensePower;
+        public int range;
+    }
+    public UnitStats stats; // 영구적인 유닛 정보 (체력, 공격력, 방어력 등)
     public Area area;              // 유닛이 위치한 영역  
     public string unitName;            // 유닛 이름  
     public int unitId;                 // 유닛 ID  
     public int health;                 // 유닛 체력  
     public int attackPower;            // 유닛 공격력  
     public int defensePower;           // 유닛 방어력  
+    public int range;                // 유닛 공격 사거리
     public bool isAttackable = true; // 유닛이 공격 가능한지 여부
     public bool isMovable = true;   // 유닛이 이동 가능한지 여부
     public bool isSupportable = true; // 유닛이 지원 가능한지 여부
+    public bool isDamagedable = true; // 유닛이 피해를 입을 수 있는지 여부
     public Faction faction;           // 유닛의 진영 (예: 아군, 적군)  
     public UnitType unitType;              // 유닛의 종류 (예: 보병, 기병, 원거리)  
-    public List<UnitTrait> unitTrait = null;          // 유닛의 특성 (예: 공격력 증가, 방어력 증가 등)
+    public List<UnitTrait> unitTrait;          // 유닛의 특성 (예: 공격력 증가, 방어력 증가 등)
 
     public List<StatusEffect> statusEffects = new List<StatusEffect>(); // 유닛의 상태 효과 목록  
-
+    public void Awake()
+    {
+        UnitManager.Instance.RegisterUnit(this); // 유닛 등록  
+    }
     private void OnMouseDown()
     {
         UnitSelector.Instance.OnUnitClicked(this);
     }
 
-    void Start()
+    public void BeginBattle()
     {
-        UnitManager.Instance.RegisterUnit(this); // 유닛 등록  
+        health = stats.currentHealth; // 영구적인 정보에서 체력 초기화
+        attackPower = stats.attackPower; // 영구적인 정보에서 공격력 초기화
+        defensePower = stats.defensePower; // 영구적인 정보에서 방어력 초기화
+        range = stats.range; // 영구적인 정보에서 사거리 초기화
+        if (unitType == UnitType.Ranged)
+        {
+            isAttackable = false; // 원거리 유닛은 기본적으로 공격 불가능
+        }
+        foreach (var trait in unitTrait)
+        {
+            trait.OnApply(this);
+        }
+        foreach (var effect in statusEffects)
+        {
+            effect.OnApply(this, null);
+        }
+    }
+    public void BeginTurn()
+    {
+ 
+        isMovable = true; // 턴 시작 시 이동 가능하도록 설정
+        if (GetSupport() != null)
+        {
+            isSupportable = true; // 턴 시작 시 지원 가능하도록 설정
+        }
+        isAttackable = true; // 턴 시작 시 공격 가능하도록 설정
+        isMovable = true; // 턴 시작 시 이동 가능하도록 설정
+
     }
 
     public virtual Support GetSupport()
@@ -58,33 +99,39 @@ public abstract class Unit : MonoBehaviour
 
     public virtual void Defense()
     {
+
         BattleManager.Instance.SpendCommandPoints(BattleManager.Instance.GetActionCost(Action.Defend)); // 방어를 사용하기 위해 명령 포인트 소모
         AddStatusEffect(new Defending(1, defensePower)); // 방어 상태 효과 추가  
     }
 
     public virtual void Damaged(Unit unit, DamageType damageType, int damage)
     {
-        int finalDamage = ApplyBeforeDamageEffects(unit, damageType, damage);
-        ApplyDamage(finalDamage);
-        ApplyAfterDamageEffects(unit, damageType, finalDamage);
-
+        if (!isDamagedable)return; // 유닛이 피해를 입을 수 없는 상태라면 아무 작업도 하지 않음
+        int finalDamage = BeforeDamaged(unit, damageType, damage);
+        health -= finalDamage;
+        AfterDamaged(unit, damageType, finalDamage);
         if (health <= 0)
         {
             Die();
 
         }
     }
-    public virtual int ApplyBeforeMove(Unit unit, Area targetArea)
+    public virtual int BeforeMove(Unit unit, Area target)
     {
-        int moveRange = 0;
-        foreach (var effect in statusEffects)
+        int moveRange = 1;
+        foreach (var trait in statusEffects)
         {
-            moveRange += effect.OnBeforeMove(unit, targetArea);
+            var (v, flag) = trait.OnBeforeMove(this, target, moveRange);
+            moveRange = v;
+            isMovable = flag || isMovable;
 
         }
-        foreach (var trait in unitTrait)
+        foreach (var effect in statusEffects)
         {
-            moveRange += trait.OnBeforeMove(unit, targetArea);
+            var (v, flag) = effect.OnBeforeMove(this, target, moveRange);
+            moveRange = v;
+            isMovable = flag || isMovable;
+
         }
         return moveRange;
     }
@@ -101,32 +148,30 @@ public abstract class Unit : MonoBehaviour
         isMovable = false; // 이동 후에는 다시 이동할 수 없도록 설정
     }
 
-    private int ApplyBeforeDamageEffects(Unit unit, DamageType damageType, int damage)
+    private int BeforeDamaged(Unit unit, DamageType damageType, int damage)
     {
+        
         if (SideAttack(unit, this, damageType, damage))
         {
             this.AddStatusEffect(new SideExposed(1)); // 측면 공격 효과 추가
         }
         foreach (var trait in unitTrait)
         {
-            damage = trait.OnBeforeDamage(unit, this, damageType, damage);
+            var (v, flag) = trait.OnBeforeDamaged(unit, this, damageType, damage);
+            damage = v;
+            isDamagedable = flag || isDamagedable;
         }
 
         foreach (var effect in statusEffects)
         {
-            damage = effect.OnBeforeDamage(unit, this, damageType, damage);
+            var (v, flag) = effect.OnBeforeDamaged(unit, this, damageType, damage);
+            damage = v;
+            isDamagedable = flag || isDamagedable;
         }
-
-
 
         return damage;
     }
 
-    private void ApplyDamage(int damage)
-    {
-        health -= damage;
-        Debug.Log($"{unitName}이 {damage} 피해를 입었습니다.");
-    }
     private bool SideAttack(Unit from, Unit to, DamageType damageType, int damage)
     {
         if (damageType == DamageType.Support && (from.unitType == UnitType.Melee || from.unitType == UnitType.Cavalry) && GridHelper.Instance.isSide(from.area, to.area))
@@ -139,17 +184,16 @@ public abstract class Unit : MonoBehaviour
         }
     }
 
-    private void ApplyAfterDamageEffects(Unit unit, DamageType damageType, int damage)
+    private void AfterDamaged(Unit unit, DamageType damageType, int damage)
     {
         foreach (var trait in unitTrait)
         {
-            trait.OnAfterDamage(unit, this, damageType, damage);
+            trait.OnAfterDamaged(unit, this, damageType, damage);
         }
         foreach (var effect in statusEffects)
         {
-            effect.OnAfterDamage(unit, this, damageType, damage);
+            effect.OnAfterDamaged(unit, this, damageType, damage);
         }
-
     }
 
     public virtual void Die()
@@ -167,11 +211,20 @@ public abstract class Unit : MonoBehaviour
         }
         area.SetAreaCondition();
         UnitManager.Instance.UnregisterUnit(this);
+        foreach (var effect in statusEffects)
+        {
+            effect.OnDie(this); // 상태 효과 만료 처리
+        }
+        foreach (var trait in unitTrait)
+        {
+            trait.OnDie(this); // 유닛 특성 처리
+        }
         Destroy(gameObject);
     }
 
     public virtual void AddStatusEffect(StatusEffect newEffect)
     {
+        newEffect.OnApply(this, null); // 상태 효과 적용
         var existing = statusEffects.Find(e => e.type == newEffect.type);
 
         if (existing != null)
@@ -190,62 +243,114 @@ public abstract class Unit : MonoBehaviour
         {
             case StackType.duration:
                 existing.duration += newEffect.duration;
+                statusEffects.Remove(existing); // 기존 효과를 제거하여 중복 방지
+                AddNewStatusEffect(existing); // 새로운 효과를 추가하여 로그 출력                
                 Debug.Log($"[{newEffect.type}] 지속시간이 중첩되었습니다. 총 {existing.duration}턴");
                 break;
             case StackType.value:
                 existing.value += newEffect.value;
+                statusEffects.Remove(existing); // 기존 효과를 제거하여 중복 방지
+                AddNewStatusEffect(existing); // 새로운 효과를 추가하여 로그 출력 
                 Debug.Log($"[{newEffect.type}] 효과값이 중첩되었습니다. 총 value: {existing.value}");
                 break;
             case StackType.count:
                 existing.count += newEffect.count;
+                statusEffects.Remove(existing); // 기존 효과를 제거하여 중복 방지
+                AddNewStatusEffect(existing); // 새로운 효과를 추가하여 로그 출력 
                 Debug.Log($"[{newEffect.type}] 사용 횟수가 중첩되었습니다. 총 count: {existing.count}");
                 break;
             case StackType.none:
-                Debug.Log($"[{newEffect.type}] 이미 같은 효과가 존재하므로 무시됨.");
                 break;
         }
+    }
+    public void DoMove(Area target)
+    {
+        if (!isMovable) return; // 유닛이 이동할 수 없는 상태라면 아무 작업도 하지 않음
+        int moveRange = BeforeMove(this, target); // 이동 전 처리
+        BattleManager.Instance.SpendCommandPoints(BattleManager.Instance.GetActionCost(Action.Move)); // 이동을 사용하기 위해 명령 포인트 소모
+        switch (faction)
+        {
+            case Faction.Friendly:
+                if (!isMovable || !GridHelper.Instance.IsFriendlyMoveAllowed(area, target, moveRange)) return;
+                area.occupyingFriendlyUnit = null;
+                transform.position = target.transform.position;
+                area = target;
+                if (target.occupyingEnemyUnit != null)
+                {
+                    target.firstAttacker = this;
+                    target.secondAttacker = target.occupyingEnemyUnit;
+                }
+                target.occupyingFriendlyUnit = this;
+                target.SetAreaCondition();
+                UnitSelector.Instance.CancelSelection();
+                BattleManager.Instance.SetState(BattleManager.States.UnitSelection);
+                break;
+            case Faction.Enemy:
+                if (!isMovable || !GridHelper.Instance.IsEnemyMoveAllowed(area, target, moveRange)) return;
+                area.occupyingEnemyUnit = null;
+                transform.position = target.transform.position;
+                area = target;
+                if (target.occupyingEnemyUnit != null)
+                {
+                    target.firstAttacker = this;
+                    target.secondAttacker = target.occupyingFriendlyUnit;
+                }
+                target.occupyingFriendlyUnit = this;
+                target.SetAreaCondition();
+                break;
+        }
+        AfterMove(this, target);
+
     }
 
     private void AddNewStatusEffect(StatusEffect newEffect)
     {
         statusEffects.Add(newEffect);
-        newEffect.OnApply(this, null);
     }
 
-    public virtual void UpdateStatusEffects()
+    public void UpdateStatusEffects()
     {
         for (int i = statusEffects.Count - 1; i >= 0; i--)
         {
-            StatusEffect effect = statusEffects[i];
-            effect.OnUpdate(this, null);
-            effect.duration--;
+            var effect = statusEffects[i];
+            effect.OnUpdate(this, null); // 상태 효과 업데이트
+            if (effect.duration > 0)
+                effect.duration--;
 
             if (effect.duration <= 0)
-            {
-                RemoveExpiredEffect(effect, i);
-            }
+                RemoveExpiredEffect(effect); // index 없이 제거
         }
     }
-
-    private void RemoveExpiredEffect(StatusEffect effect, int index)
+    public void RemoveExpiredEffect(StatusEffect effect)
     {
         effect.OnExpire(this, null);
-        statusEffects.RemoveAt(index);
+        statusEffects.Remove(effect);
     }
 
-    public int PrepareAttack(Unit target, int damage)
+    public int BeforeAttack(Unit target)
     {
-        int bonusDamage = 0;
+        int damage = attackPower;
         foreach (var trait in unitTrait)
         {
-            bonusDamage += trait.OnBeforeAttack(this, target, damage);
+            var (v, flag) = trait.OnBeforeAttack(this, target, damage);
+            damage = v;
+            isAttackable = flag || isAttackable;
         }
         foreach (var effect in statusEffects)
         {
-            bonusDamage += effect.OnBeforeAttack(this, target, damage);
+            var (v, flag) = effect.OnBeforeAttack(this, target, damage);
+            damage = v;
+            isAttackable = flag || isAttackable;
         }
-        return damage + bonusDamage;
+        return damage;
 
+    }
+
+    public virtual void DoAttack(Unit target)
+    {
+        int damage = BeforeAttack(target);
+        Damaged(target, Unit.DamageType.Damage, damage);
+        AfterAttack(target, damage);
     }
     public void AfterAttack(Unit target, int damage)
     {
@@ -257,71 +362,71 @@ public abstract class Unit : MonoBehaviour
         {
             effect.OnAfterAttack(this, target, damage);
         }
+        isAttackable = false; // 공격 후에는 다시 공격할 수 없도록 설정
     }
-    public int PrepareSupport(Area to)
-    {
-        int bonus = 0;
-        Support support = GetSupport();
-        foreach (var effect in statusEffects)
-        {
-            bonus += effect.OnBeforeSupport(this, to);
-        }
-        foreach (var trait in unitTrait)
-        {
-            bonus += trait.OnBeforeSupport(this, to);
-        }
-        isSupportable = isSupportable || support.areacond.Contains(area.areaCondition) && GridHelper.Instance.IsInRange(area, to, support.supportRange);
-        BattleManager.Instance.SpendCommandPoints(BattleManager.Instance.GetActionCost(Action.Support)); // 지원을 사용하기 위해 명령 포인트 소모
-
-        return support.supportAmount + bonus; // 지원 효과에 보너스 추가
-    }
-
-
     public class Support
     {
         public Unit owner;
-        public List<AreaCondition> areacond;
-        public List<Unit.Faction> factions = new List<Unit.Faction> { Unit.Faction.Friendly, Unit.Faction.Enemy };
-        public int supportAmount;
-        public int supportRange;
+        public List<AreaCondition> validConditions;
+        public List<Unit.Faction> validFactions;
+        public int baseValue;
+        public int range;
 
-        public Support(Unit owner, List<AreaCondition> areacond, List<Unit.Faction> factions, int supportAmount, int supportRange)
+        public Support(Unit owner, List<AreaCondition> validConditions, List<Unit.Faction> validFactions, int baseValue, int range)
         {
             this.owner = owner;
-            this.areacond = areacond;
-            this.factions = factions;
-            this.supportAmount = supportAmount;
-            this.supportRange = supportRange;
-        }
-        public void BeforeSupport(Area area)
-        {
-            owner.PrepareSupport(area); // 지원 준비 단계에서 호출
-            if (!owner.isSupportable)
-            {
-                return;
-            }
+            this.validConditions = validConditions;
+            this.validFactions = validFactions;
+            this.baseValue = owner.attackPower;
+            this.range = owner.range;
         }
 
-        public virtual void DoSupport(Area area)
+        public (int value, bool isValid) BeforeSupport(Area target)
         {
-            BeforeSupport(area); // 지원 전 준비 단계 호출
-        }
-        public virtual void AfterSupport(Area area)
-        {
-            foreach (var effect in owner.statusEffects)
-            {
-                effect.OnAfterSupport(owner, area); // 상태 효과의 지원 후 처리 호출
-            }
+            int value = baseValue;
+            bool isSupportable = owner.isSupportable || GridHelper.Instance.IsInRange(owner.area, target, range) && validConditions.Contains(target.areaCondition);
+
             foreach (var trait in owner.unitTrait)
             {
-                trait.OnAfterSupport(owner, area); // 유닛 특성의 지원 후 처리 호출
+                var (v, flag) = trait.OnBeforeSupport(owner, target, value);
+                value = v;
+                isSupportable = flag || isSupportable;
             }
-            owner.isSupportable = false; // 지원 후에는 다시 지원할 수 없도록 설정
-            if (owner.unitType == UnitType.Cavalry || owner.unitType == UnitType.RangedCavalry)
+            foreach (var effect in owner.statusEffects)
+            {
+                var (v, flag) = effect.OnBeforeSupport(owner, target,value);
+                value = v;
+                isSupportable = flag|| isSupportable;
+            }
+            return (value, isSupportable);
+        }
+
+        public virtual void DoSupport(Area target)
+        {
+            var (value, isSupportable) = BeforeSupport(target);
+            if (!isSupportable) return;
+            BattleManager.Instance.SpendCommandPoints(BattleManager.Instance.GetActionCost(Action.Support));
+            if (owner.unitType == Unit.UnitType.Cavalry || owner.unitType == Unit.UnitType.RangedCavalry)
             {
                 owner.AddStatusEffect(new SideExposed(1));
             }
+            if (target.occupyingEnemyUnit != null)
+            {
+                target.occupyingEnemyUnit.Damaged(owner, Unit.DamageType.Support, value);
+            }
+            AfterEffect(target, value);
+        }
 
+        private void AfterEffect(Area target, int value)
+        {
+            foreach (var effect in owner.statusEffects)
+            {
+                effect.OnAfterSupport(owner, target, value);
+            }
+            foreach (var trait in owner.unitTrait)
+            {
+                trait.OnAfterSupport(owner, target, value);
+            }
         }
     }
 }
