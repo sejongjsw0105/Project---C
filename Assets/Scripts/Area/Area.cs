@@ -34,7 +34,7 @@ public class Area : MonoBehaviour
     {
         return Tuple.Create(areaIndexX, areaIndexY);
     }
-    public void SetAreaCondition()
+    public void UpdateAreaCondition()
     {
         Unit unit1 = occupyingFriendlyUnit;
         Unit unit2 = occupyingEnemyUnit;

@@ -50,24 +50,24 @@ public class BattleManager : MonoBehaviour
                 currentCommandPoints = maxCommandPointsPerTurn;
                 break;
             case States.ActionSelection:
-                ActionSelector.Instance.BeginSelection();
                 break;
             case States.UnitSelection:
-                UnitSelector.Instance.BeginSelection();
                 break;
             case States.AreaSelection:
-                AreaSelector.Instance.BeginSelection();
                 break;
             case States.UnitMove:
+                Instance.SpendCommandPoints(Instance.GetActionCost(Action.Move));
                 currentUnit.DoMove(currentArea); // 현재 유닛을 선택된 지역으로 이동
                 break;
             case States.UnitSupport:
                 Debug.Log("유닛 지원 행동 처리");
+                Instance.SpendCommandPoints(Instance.GetActionCost(Action.Support));
                 currentSupport = currentUnit.GetSupport();
                 currentSupport.DoSupport(currentArea);
                 CheckVictoryCondition();
                 break;
             case States.UnitDefend:
+                Instance.SpendCommandPoints(Instance.GetActionCost(Action.Defend));
                 Debug.Log("유닛 방어 행동 처리");
                 currentUnit.Defense();
                 break;
@@ -129,7 +129,7 @@ public class BattleManager : MonoBehaviour
         SetState(States.BattleStart);
         Debug.Log("전투 초기화");
     }
-    public bool TrySpendCommandPoints(int amount)
+    public bool CanAffordCommandPoints(int amount)
     {
         if (currentCommandPoints >= amount)
         {
@@ -187,6 +187,113 @@ public class BattleManager : MonoBehaviour
             Debug.Log("아군 전멸 - 패배...");
             SetState(States.BattleEnd);
         }
+    }
+    public void HandleActionClick(Action action)
+    {
+        switch (Instance.currentState)
+        {
+            case States.ActionSelection:
+                // 이미 지역이 선택된 상태에서 다시 클릭하면 선택 해제
+                if (Instance.currentAction == action)
+                {
+                    CancelSelection();
+                    return;
+                }
+                else
+                {
+                    Instance.SetCurrentAction(action);
+                    Debug.Log($"{action} 선택됨");
+                    switch (Instance.currentAction)
+                    {
+                        case Action.Move:
+                            Instance.SetState(States.UnitMove);
+                            break;
+                        case Action.Support:
+                            Instance.SetState(States.UnitSupport);
+                            break;
+                        case Action.Defend:
+                            Instance.SetState(States.UnitDefend);
+                            break;
+                    }
+                }
+                break;
+            default:
+                //UI로 액션 정보 띄우기
+                return;
+        }
+    }
+    public void HandleUnitClick(Unit unit)
+    {
+        switch (Instance.currentState)
+        {
+            case States.UnitSelection:
+                // 이미 유닛이 선택된 상태에서 다시 클릭하면 선택 해제
+                if (Instance.currentUnit == unit)
+                {
+                    CancelSelection();
+                    return;
+                }
+                if (Instance.currentAction == Action.Support && unit.GetSupport() == null)
+                {
+                    Debug.LogWarning("이 유닛은 지원 행동을 사용할 수 없습니다.");
+                    return;
+                }
+                else
+                {
+                    Instance.currentUnit = unit;
+                    Debug.Log($"{unit.unitName} 선택됨");
+                    switch (Instance.currentAction)
+                    {
+                        case Action.Move:
+                            Instance.SetState(States.AreaSelection);
+                            break;
+                        case Action.Support:
+                            Instance.SetState(States.AreaSelection);
+                            break;
+
+                        case Action.Defend:
+                            Instance.SetState(States.UnitDefend);
+                            break;
+                    }
+                }
+                break;
+            default:
+                //UI로 유닛 정보 띄우기
+                Debug.LogWarning("현재 상태에서는 유닛을 선택할 수 없습니다.");
+                return;
+        }
+    }
+    public void HandleAreaClick(Area area)
+    {
+        switch (Instance.currentState)
+        {
+            case States.AreaSelection:
+                // 이미 지역이 선택된 상태에서 다시 클릭하면 선택 해제
+                if (Instance.currentArea == area)
+                {
+                    CancelSelection();
+                    return;
+                }
+                else
+                {
+                    Instance.currentArea = area;
+                    Debug.Log($"{area.areaType} 선택됨");
+                    Instance.SetState(States.UnitSelection);
+                }
+                break;
+            default:
+                //UI로 지역 정보 띄우기
+                return;
+        }
+    }
+
+
+
+    public void CancelSelection()
+    {
+        Instance.currentUnit = null;
+        Instance.SetCurrentAction(Action.None);
+        Instance.currentArea = null;
     }
 
 

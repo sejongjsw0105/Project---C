@@ -67,7 +67,7 @@ public class GridHelper : MonoBehaviour
     {
         int dx = Mathf.Abs(from.areaIndexX - to.areaIndexX);
         int dy = Mathf.Abs(from.areaIndexY - to.areaIndexY);
-        return (dx + dy) <= range;
+        return Mathf.Max(dx + dy) <= range;
     }
 
 

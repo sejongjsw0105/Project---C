@@ -1,0 +1,34 @@
+﻿id,name,faction,type,maxHealth,attack,defense,range,traits
+,사수,Friendly,Ranged,20,30,35,2,
+,민병,Friendly,Melee,100,40,35,1,
+,기병,Friendly,Cavalry,50,30,10,1,
+,궁기병,Friendly,RangedCavalry,30,20,10,1,
+,화염사수,Friendly,Ranged,20,25,35,2,Fire
+,수노병,Friendly,Ranged,25,55,35,2,Reload
+,살수,Friendly,Melee,90,40,35,1,CounterAttack
+,지원궁수,Friendly,Ranged,20,30,30,2,Cover
+,사냥꾼,Friendly,Melee,80,45,30,1,Surprise
+,장궁병,Friendly,Ranged,20,15,10,3,Sniping
+,착호 갑사,Friendly,Melee,95,60,35,1,Fear
+,팽배수,Friendly,Melee,110,35,50,1,Shielded
+,기마갑사,Friendly,RangedCavalry,25,20,10,1,CloseRangeShooting
+,승자총통수,Friendly,Ranged,25,35,30,2,"Reload, Cover"
+,화차,Friendly,Ranged,30,50,30,2,"Reload(2턴), SuccesiveFiring, Fire, Heavy"
+,완구포대,Friendly,Ranged,30,55,30,2,"Reload(2턴), AreaAttack, Heavy"
+,츄겐,Enemy,Melee,60,50,50,1,
+,타테유미,Enemy,Ranged,30,20,40,2,
+,유미,Enemy,Ranged,20,20,25,3,
+,카치 사무라이,Enemy,Melee,100,50,40,1,
+,기병,Enemy,Cavalry,50,30,10,1,
+,하이 유미,Enemy,Ranged,20,25,25,3,Fire
+,야리,Enemy,Melee,95,40,35,1,CounterAttack
+,하타모토1,Enemy,Melee,90,30,35,1,Boost
+,하타모토2,Enemy,Melee,90,30,30,1,PsychologicalWarfare
+,지원궁수,Enemy,Ranged,20,15,30,3,Cover
+,보즈,Enemy,Melee,70,10,30,1,Healer
+,소게키 뎃포,Enemy,Ranged,20,35,25,4,Sniping
+,사무라이,Enemy,Melee,95,45,35,1,Fear
+,시루도 사무라이,Enemy,Melee,110,30,50,1,Shielded
+,킨세츠 뎃포,Enemy,Ranged,25,30,25,2,Cover
+,뎃포,Enemy,Ranged,30,20,40,1,"SuccesiveFiring, Reload"
+,대조총병,Enemy,Ranged,30,55,25,2,"Pressure, Reload, Heavy"

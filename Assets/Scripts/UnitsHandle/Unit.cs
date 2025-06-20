@@ -51,13 +51,13 @@ public abstract class Unit : MonoBehaviour
     public List<UnitTrait> unitTrait;          // 유닛의 특성 (예: 공격력 증가, 방어력 증가 등)
 
     public List<StatusEffect> statusEffects = new List<StatusEffect>(); // 유닛의 상태 효과 목록  
-    public void Awake()
+    public void Start()
     {
         UnitManager.Instance.RegisterUnit(this); // 유닛 등록  
     }
     private void OnMouseDown()
     {
-        UnitSelector.Instance.OnUnitClicked(this);
+        BattleManager.Instance.HandleUnitClick(this); // 유닛 클릭 시 BattleManager에 전달
     }
 
     public void BeginBattle()
@@ -99,8 +99,6 @@ public abstract class Unit : MonoBehaviour
 
     public virtual void Defense()
     {
-
-        BattleManager.Instance.SpendCommandPoints(BattleManager.Instance.GetActionCost(Action.Defend)); // 방어를 사용하기 위해 명령 포인트 소모
         AddStatusEffect(new Defending(1, defensePower)); // 방어 상태 효과 추가  
     }
 
@@ -209,7 +207,7 @@ public abstract class Unit : MonoBehaviour
                 area.occupyingEnemyUnit = null; // 영역에서 적군 유닛 제거
                 break;
         }
-        area.SetAreaCondition();
+        area.UpdateAreaCondition();
         UnitManager.Instance.UnregisterUnit(this);
         foreach (var effect in statusEffects)
         {
@@ -267,7 +265,6 @@ public abstract class Unit : MonoBehaviour
     {
         if (!isMovable) return; // 유닛이 이동할 수 없는 상태라면 아무 작업도 하지 않음
         int moveRange = BeforeMove(this, target); // 이동 전 처리
-        BattleManager.Instance.SpendCommandPoints(BattleManager.Instance.GetActionCost(Action.Move)); // 이동을 사용하기 위해 명령 포인트 소모
         switch (faction)
         {
             case Faction.Friendly:
@@ -281,8 +278,8 @@ public abstract class Unit : MonoBehaviour
                     target.secondAttacker = target.occupyingEnemyUnit;
                 }
                 target.occupyingFriendlyUnit = this;
-                target.SetAreaCondition();
-                UnitSelector.Instance.CancelSelection();
+                target.UpdateAreaCondition();
+                BattleManager.Instance.CancelSelection(); 
                 BattleManager.Instance.SetState(BattleManager.States.UnitSelection);
                 break;
             case Faction.Enemy:
@@ -296,7 +293,7 @@ public abstract class Unit : MonoBehaviour
                     target.secondAttacker = target.occupyingFriendlyUnit;
                 }
                 target.occupyingFriendlyUnit = this;
-                target.SetAreaCondition();
+                target.UpdateAreaCondition();
                 break;
         }
         AfterMove(this, target);
@@ -404,8 +401,7 @@ public abstract class Unit : MonoBehaviour
         public virtual void DoSupport(Area target)
         {
             var (value, isSupportable) = BeforeSupport(target);
-            if (!isSupportable) return;
-            BattleManager.Instance.SpendCommandPoints(BattleManager.Instance.GetActionCost(Action.Support));
+            if (!isSupportable) return;    
             if (owner.unitType == Unit.UnitType.Cavalry || owner.unitType == Unit.UnitType.RangedCavalry)
             {
                 owner.AddStatusEffect(new SideExposed(1));

@@ -30,9 +30,9 @@ public class ClickManager : MonoBehaviour
             return;
         }
         int cost = BattleManager.Instance.GetActionCost(action);
-        if (!BattleManager.Instance.TrySpendCommandPoints(cost))
+        if (!BattleManager.Instance.CanAffordCommandPoints(cost))
             return;
-    ActionSelector.Instance.OnActionClicked(action);
+        BattleManager.Instance.HandleActionClick(action);
     }
 
     public void HandleTurnEndButtonClick()
@@ -57,14 +57,14 @@ public class ClickManager : MonoBehaviour
             if (clicked.TryGetComponent<Unit>(out var unit))
             {
                 if (BattleManager.Instance.currentState == BattleManager.States.UnitSelection)
-                    UnitSelector.Instance.OnUnitClicked(unit);
+                    BattleManager.Instance.HandleUnitClick(unit);
                 else
                     CancelAllSelections(); // 잘못된 타이밍 클릭 → 취소
             }
             else if (clicked.TryGetComponent<Area>(out var area))
             {
                 if (BattleManager.Instance.currentState == BattleManager.States.AreaSelection)
-                    AreaSelector.Instance.OnAreaClicked(area);
+                    BattleManager.Instance.HandleAreaClick(area);
                 else
                     CancelAllSelections();
             }
@@ -83,9 +83,7 @@ public class ClickManager : MonoBehaviour
 
     public void CancelAllSelections()
     {
-        UnitSelector.Instance.CancelSelection();
-        AreaSelector.Instance.CancelSelection();
-        ActionSelector.Instance.CancelSelection();
+        BattleManager.Instance.CancelSelection();
         BattleManager.Instance.currentUnit = null;
         BattleManager.Instance.currentArea = null;
         BattleManager.Instance.SetCurrentAction(Action.None);
