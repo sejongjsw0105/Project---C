@@ -30,6 +30,21 @@ public class Area : MonoBehaviour
     public Unit occupyingEnemyUnit;         // 현재 영역을 점령하고 있는 유닛
     public AreaCondition areaCondition; // 영역의 상태
     public List<StatusEffect> statusEffects = new List<StatusEffect>();
+    private void Start()
+    {
+        if (AreaManager.Instance != null)
+        {
+            AreaManager.Instance.RegisterArea(this);
+        }
+        switch (areaIndexY)
+        {
+            case 0: areaType = AreaType.FriendlyFinal; break;
+            case 1: areaType = AreaType.FriendlyRear; break;
+            case 2: areaType = AreaType.Frontline; break;
+            case 3: areaType = AreaType.EnemyRear; break;
+            case 4: areaType = AreaType.EnemyFinal; break;
+        }
+    }
     public Tuple<int, int> GetPosition()
     {
         return Tuple.Create(areaIndexX, areaIndexY);
