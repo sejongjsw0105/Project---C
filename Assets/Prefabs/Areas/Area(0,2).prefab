@@ -15,7 +15,7 @@ GameObject:
   - component: {fileID: 7314984554738765613}
   - component: {fileID: 3395935414838869923}
   m_Layer: 0
-  m_Name: Area(1,2)
+  m_Name: Area(0,2)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -146,7 +146,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   firstAttacker: {fileID: 0}
   secondAttacker: {fileID: 0}
-  areaIndexX: 1
+  areaIndexX: 0
   areaIndexY: 2
   areaType: 0
   occupyingFriendlyUnit: {fileID: 0}
