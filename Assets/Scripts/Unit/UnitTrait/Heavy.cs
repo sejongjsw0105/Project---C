@@ -27,7 +27,7 @@ public class Heavy : UnitTrait
     {
         isAttacked = true;
     }
-    public override void OnUpdate(Unit from, Area area)
+    public override void OnUpdate(Unit from)
     {
         isAttacked = false;
     }

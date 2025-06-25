@@ -8,7 +8,7 @@ public class Armored : UnitTrait
         type = UnitTraitType.Armored;
         unitTypes = new List<Unit.UnitType> { Unit.UnitType.Melee, Unit.UnitType.Cavalry };
     }
-    public override void OnUpdate(Unit from, Area area)
+    public override void OnUpdate(Unit from)
     {
         from.AddStatusEffect(new Protected());
     }

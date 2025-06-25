@@ -9,6 +9,6 @@ public class Boosted:StatusEffect
     }
     public override (int, bool) OnBeforeAttack(Unit attacker, Unit target, int damage)
     {
-        return (damage * value, true);
+        return (damage * (int)(1 +value/100), true);
     }  
 }

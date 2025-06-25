@@ -2,7 +2,7 @@ import pandas as pd
 import os
 
 # CSV 파일 경로 설정
-csv_path = "C:/Users/User/Project - C/Assets/기획/Units.csv"  # 실제 CSV 파일 경로로 수정하세요
+csv_path = "C:/Users/User/Project - C/Assets/기획/Units.csv"
 df = pd.read_csv(csv_path).fillna("")
 
 # 출력 폴더 설정
@@ -29,12 +29,38 @@ for idx, row in df.iterrows():
     faction = faction_map.get(row['faction'], "Friendly")
     traits = [t.strip() for t in str(row['traits']).split(',') if t.strip()]
 
+    # 트레잇 처리
     trait_lines = ""
     if traits:
         trait_lines = "\n        unitTrait = new System.Collections.Generic.List<UnitTrait>\n        {\n"
         trait_lines += ",\n".join([f"            gameObject.AddComponent<{trait}>()" for trait in traits])
         trait_lines += "\n        };"
 
+    # 업그레이드 블럭 - 적 유닛이면 stats 복붙, 아군이면 upgraded 값 사용
+    if faction == "Enemy":
+        upgraded_block = f"""
+
+        upgradedStats = new UnitStats
+        {{
+            maxHealth = {int(row['maxHealth'])},
+            currentHealth = {int(row['maxHealth'])},
+            attackPower = {int(row['attack'])},
+            defensePower = {int(row['defense'])},
+            range = {int(row['range'])}
+        }};"""
+    else:
+        upgraded_block = f"""
+
+        upgradedStats = new UnitStats
+        {{
+            maxHealth = {int(row.get('upgradedHealth', row['maxHealth']))},
+            currentHealth = {int(row.get('upgradedHealth', row['maxHealth']))},
+            attackPower = {int(row.get('upgradedAttack', row['attack']))},
+            defensePower = {int(row.get('upgradedDefense', row['defense']))},
+            range = {int(row.get('upgradedRange', row['range']))}
+        }};"""
+
+    # 전체 클래스 코드 구성
     cs_code = f"""using UnityEngine;
 
 public class {class_name} : Unit
@@ -47,21 +73,19 @@ public class {class_name} : Unit
 
         stats = new UnitStats
         {{
-            maxHealth = {row['maxHealth']},
-            currentHealth = {row['maxHealth']},
-            attackPower = {row['attack']},
-            defensePower = {row['defense']},
-            range = {row['range']}
-        }};
+            maxHealth = {int(row['maxHealth'])},
+            currentHealth = {int(row['maxHealth'])},
+            attackPower = {int(row['attack'])},
+            defensePower = {int(row['defense'])},
+            range = {int(row['range'])}
+        }};{upgraded_block}
 
-        health = stats.maxHealth;
-        attackPower = stats.attackPower;
-        defensePower = stats.defensePower;
-        range = stats.range;{trait_lines}
+
     }}
 }}
 """
 
+    # 파일 저장
     file_name = f"{class_name}.cs"
     file_path = os.path.join(output_dir, file_name)
     with open(file_path, "w", encoding="utf-8") as f:
