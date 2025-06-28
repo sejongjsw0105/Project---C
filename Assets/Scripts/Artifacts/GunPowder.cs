@@ -6,17 +6,19 @@ public class GunPowder : Artifact
     {
         artifactName = "GunPowder";
     }
-    public override (int, bool) OnBeforeAttack(Unit attacker, Unit target, int damage)
+    public override ResultContext<int> OnBeforeAttack(Unit attacker, Unit target, int damage)
     {
+        var context = new ResultContext<int>(damage);
+
         if (attacker.unitName == "승자총통수"|| attacker.unitName == "화차")
         {
-            if(attacker.faction == Unit.Faction.Friendly)
+            if(attacker.faction == Faction.Friendly)
             {
-                return ((int)(damage *1.5), true);
+                context.Modify((int)(damage * 1.5), "GunPowder");
+                
             }
         }
-        // 공격 전에 데미지를 2배로 증가시킴
-        return (damage, true);
+        return context;
     }
 
 }

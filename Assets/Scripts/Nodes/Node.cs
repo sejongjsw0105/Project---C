@@ -17,7 +17,7 @@ public abstract class Node: MonoBehaviour
         None        // 빈 노드 또는 미정
     }
     public NodeType nodeType;                  // 노드 타입
-    public int nodeMapId;                                   
+    public int mapStage; // 몇 번째 맵/층인지        
     public int nodeId;
     public Vector2Int gridPosition;            // 메인맵 내 좌표
     public List<Node> connectedNextNodes;    // 연결된 다음 노드들

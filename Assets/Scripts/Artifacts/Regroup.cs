@@ -18,7 +18,7 @@ public class Regroup : Artifact
             attack = unit.stats.attackPower,
             defense = unit.stats.defensePower,
             range = unit.stats.range,
-            traits = unit.unitTrait.Select(t => t.type.ToString()).ToArray()
+            traits = unit.unitTrait,
         };
 
         deadUnits.Add(data);

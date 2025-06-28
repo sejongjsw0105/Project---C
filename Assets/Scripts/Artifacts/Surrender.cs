@@ -7,14 +7,14 @@ public class Surrender : Artifact
     {
         artifactName = "Surrender";
     }
-    public override void OnAfterDamaged(Unit from, Unit target, Unit.DamageType damageType, int damage)
+    public override void OnAfterDamaged(Unit from, Unit target, DamageType damageType, int damage)
     {
-        if (target.faction == Unit.Faction.Enemy)
+        if (target.faction == Faction.Enemy)
         {
-            if (target.health <= 0)
+            if (target.currentHealth <= 0)
             {
-                target.health = (int)(target.stats.maxHealth / 2); // Prevents death
-                target.faction = Unit.Faction.Friendly; // Changes faction to friendly
+                target.currentHealth = (int)(target.stats.maxHealth / 2); // Prevents death
+                target.faction = Faction.Friendly; // Changes faction to friendly
                 target.AddStatusEffect(new Defeated());
             }
         }

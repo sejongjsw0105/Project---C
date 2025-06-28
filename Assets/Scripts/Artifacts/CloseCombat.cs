@@ -6,14 +6,14 @@ public class CloseCombat : Artifact
     {
         artifactName = "CloseCombat";
     }
-    public override (int, bool) OnBeforeAttack(Unit attacker, Unit target, int damage)
+    public override ResultContext<int> OnBeforeAttack(Unit attacker, Unit target, int damage)
     {
-
-        if (attacker.unitType == Unit.UnitType.Melee || attacker.unitType == Unit.UnitType.Cavalry)
+        var context = new ResultContext<int>(damage);
+        if (attacker.unitType == UnitType.Melee || attacker.unitType == UnitType.Cavalry)
         {
-            if(attacker.faction ==Unit.Faction.Friendly)
-            return (damage +10 , true);
+            if(attacker.faction ==Faction.Friendly)
+            context.Modify((int)((damage + 5)), "CloseCombat");
         }
-        return (damage, true);
+        return context;
     }
 }

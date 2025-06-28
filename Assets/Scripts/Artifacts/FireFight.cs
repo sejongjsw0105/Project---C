@@ -6,14 +6,17 @@ public class FireFight : Artifact
     {
         artifactName = "FireFight";
     }
-    public override (int, bool) OnBeforeAttack(Unit attacker, Unit target, int damage)
+    public override ResultContext<int> OnBeforeAttack(Unit attacker, Unit target, int damage)
     {
-
-        if (attacker.unitType == Unit.UnitType.Ranged)
+        var context = new ResultContext<int>(damage);
+        if (attacker.unitType == UnitType.Ranged)
         {
-            if(attacker.faction ==Unit.Faction.Friendly)
-            return (damage +5 , true);
+            
+            if(attacker.faction == Faction.Friendly)
+            {
+                context.Modify((int)((damage +5)));
+            }
         }
-        return (damage, true);
+        return context;
     }
 }
