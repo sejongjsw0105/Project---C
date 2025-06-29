@@ -1,76 +1,63 @@
 using System.Collections.Generic;
+using UnityEngine;
 
 public class Pressure : UnitTrait
 {
     public Pressure()
     {
-        type = UnitTraitType.Pressure;
-        unitTypes = new List<Unit.UnitType> { Unit.UnitType.Melee, Unit.UnitType.Cavalry, Unit.UnitType.Ranged,Unit.UnitType.RangedCavalry };
+        traitName = "Pressure";
+        unitTypes = new List<UnitType>
+        {
+            UnitType.Melee,
+            UnitType.Cavalry,
+            UnitType.Ranged,
+            UnitType.RangedCavalry
+        };
     }
 
     public override void OnAfterAttack(Unit attacker, Unit target, int damage)
     {
-        if (target == null || target.stats == null) return;
-
-        if (target.health > target.stats.maxHealth / 2) return; // 압박 조건: 체력 절반 이하
-
-        int x = target.area.areaIndexX;
-        int y = target.area.areaIndexY;
-
-        if (target.faction == Faction.Friendly)
-        {
-            Area retreatArea = AreaManager.Instance.GetArea(x, y - 1);
-            if (retreatArea != null)
-            {
-                target.DoMove(retreatArea); // 후퇴 이동
-            }
-        }
-        else if (target.faction == Faction.Enemy)
-        {
-            Area retreatArea = AreaManager.Instance.GetArea(x, y + 1);
-            if (retreatArea != null)
-            {
-                target.DoMove(retreatArea);
-            }
-        }
+        TryPressure(target);
     }
+
     public override void OnAfterSupport(Unit supporter, Area area, int value)
     {
-        Unit target;
-        if (supporter.faction == Faction.Friendly)
+        Unit target = supporter.faction switch
         {
-            target = area.occupyingEnemyUnit; // 지원 대상은 적 유닛
-        }
-        else if (supporter.faction == Faction.Enemy)
-        {
-            target = area.occupyingFriendlyUnit;
-        }
-        else
-        {
-            target = null; // 중립 유닛은 압박 대상이 아님
-        }
-        if (target == null || target.stats == null) return;
+            Faction.Friendly => area.occupyingEnemyUnit,
+            Faction.Enemy => area.occupyingFriendlyUnit,
+            _ => null
+        };
 
-        if (target.health > target.stats.maxHealth / 2) return; // 압박 조건: 체력 절반 이하
+        TryPressure(target);
+    }
+
+    private void TryPressure(Unit target)
+    {
+        if (target == null || target.stats == null || target.area == null) return;
+
+        if (target.currentHealth > target.stats.maxHealth / 2) return;
 
         int x = target.area.areaIndexX;
         int y = target.area.areaIndexY;
 
-        if (target.faction == Faction.Friendly)
+        int retreatY = target.faction == Faction.Friendly ? y - 1 : y + 1;
+        Area retreatArea = AreaManager.Instance.GetArea(x, retreatY);
+
+        if (retreatArea == null) return;
+
+        bool canMove = target.faction switch
         {
-            Area retreatArea = AreaManager.Instance.GetArea(x, y - 1);
-            if (retreatArea != null)
-            {
-                target.DoMove(retreatArea); // 후퇴 이동
-            }
-        }
-        else if (target.faction == Faction.Enemy)
-        {
-            Area retreatArea = AreaManager.Instance.GetArea(x, y + 1);
-            if (retreatArea != null)
-            {
-                target.DoMove(retreatArea);
-            }
-        }
+            Faction.Friendly => GridHelper.Instance.IsFriendlyMoveAllowed(target.area, retreatArea),
+            Faction.Enemy => GridHelper.Instance.IsEnemyMoveAllowed(target.area, retreatArea),
+            _ => false
+        };
+
+        if (!canMove) return;
+
+        var moveContext = new MoveContext(target, retreatArea);
+        moveContext.Resolve();
+
+        Debug.Log($"[Pressure] {target.unitName}이 압박으로 인해 후퇴했습니다!");
     }
 }

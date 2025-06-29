@@ -39,7 +39,7 @@ public abstract class Node: MonoBehaviour
                 GameContext.Instance.setCurrentNode(this); // 게임 컨텍스트에 현재 노드 설정
                 foreach (var artifact in GameContext.Instance.myArtifacts)
                 {
-                    artifact.OnNodeClicked(); // 현재 노드 클릭 이벤트 처리
+                    artifact.OnNodeClicked(this); // 현재 노드 클릭 이벤트 처리
                 }
                 SceneManager.LoadScene(targetScene);
                 return;

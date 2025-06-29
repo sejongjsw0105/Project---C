@@ -1,9 +1,7 @@
 using UnityEngine;
 using static UnityEditor.VersionControl.Asset;
-GameEvents.OnUnitDied.Subscribe(unit =>
-{
-    BattleManager.Instance.CheckVictoryCondition();
-});
+using System.Collections;
+
 public class BattleManager : MonoBehaviour
 {
     public static BattleManager Instance;
@@ -26,6 +24,10 @@ public class BattleManager : MonoBehaviour
     {
         Instance = this;
         stateMachine = new BattleStateMachine();
+        GameEvents.OnUnitDied.Subscribe(unit =>
+        {
+            BattleManager.Instance.CheckVictoryCondition();
+        });
     }
 
     private void Start()
@@ -134,6 +136,7 @@ public class BattleManager : MonoBehaviour
             GameEvents.OnBattleEnded.Invoke(battleEndReason);
             GameEvents.OnBattleEnded.Invoke(battleEndReason);
         }
+
     }
 }
 

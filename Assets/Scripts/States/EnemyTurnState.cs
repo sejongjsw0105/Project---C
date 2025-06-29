@@ -2,7 +2,7 @@ public class EnemyTurnState : IBattleState
 {
     public void Enter()
     {
-        BattleManager.Instance.StartCoroutine(EnemyAIUtility.ExecuteEnemyTurn());
+        //BattleManager.Instance.StartCoroutine(EnemyAIUtility.ExecuteEnemyTurn());
     }
 
     public void Exit() { }

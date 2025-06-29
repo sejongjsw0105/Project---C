@@ -5,7 +5,7 @@ public class UnitFactory : MonoBehaviour
 {
     public static Unit CreateUnitFromData(UnitData data)
     {
-        // 1. 유닛별 프리팹 로드
+        // 1. 프리팹 로드
         GameObject prefab = Resources.Load<GameObject>($"Units/{data.name}");
         if (prefab == null)
         {
@@ -26,50 +26,38 @@ public class UnitFactory : MonoBehaviour
         // 3. 기본 데이터 주입
         unit.unitId = data.id;
         unit.unitName = data.name;
-        unit.faction = Enum.Parse<Unit.Faction>(data.faction);
-        unit.unitType = Enum.Parse<Unit.UnitType>(data.type);
-        unit.isUpgraded = data.isUpgraded;
-        unit.health = data.currentHealth;
+        unit.faction = data.faction;
+        unit.unitType = data.type;
+        unit.currentHealth = data.currentHealth;
+        unit.unitData = data;
 
-        unit.stats = new Unit.UnitStats
+        // 4. 스탯 적용 (업그레이드 여부 반영)
+        UnitStats selectedStats = data.isUpgraded ? data.upgradedStats : data.baseStats;
+        unit.stats = new UnitStats
         {
-            maxHealth = data.maxHealth,
-            attackPower = data.attack,
-            defensePower = data.defense,
-            range = data.range
+            maxHealth = selectedStats.maxHealth,
+            attackPower = selectedStats.attackPower,
+            defensePower = selectedStats.defensePower,
+            range = selectedStats.range
         };
 
-        unit.upgradedStats = new Unit.UnitStats
-        {
-            maxHealth = data.maxHealth,
-            attackPower = data.attack,
-            defensePower = data.defense,
-            range = data.range
-        };
-
-        if (data.isUpgraded)
-        {
-            unit.attackPower = unit.upgradedStats.attackPower;
-            unit.defensePower = unit.upgradedStats.defensePower;
-            unit.range = unit.upgradedStats.range;
-        }
-        else
-        {
-            unit.attackPower = unit.stats.attackPower;
-            unit.defensePower = unit.stats.defensePower;
-            unit.range = unit.stats.range;
-        }
-
-        // 5. 트레잇 초기화
+        // 5. 트레잇 복원
         unit.unitTrait = new System.Collections.Generic.List<UnitTrait>();
-        foreach (string traitName in data.traits)
+        foreach (var trait in data.traits)
         {
-            UnitTrait trait = TraitFactory.CreateTrait(traitName, unit.gameObject);
             if (trait != null)
-                unit.unitTrait.Add(trait);
+                unit.unitTrait.Add(trait); // 이미 MonoBehaviour 컴포넌트로 존재한다고 가정
         }
 
-        // 6. 등록
+        // 6. 상태이상 복원 (선택 사항)
+        unit.statusEffects = new System.Collections.Generic.List<StatusEffect>();
+        foreach (var effect in data.statusEffects)
+        {
+            if (effect != null)
+                unit.statusEffects.Add(effect); // 상태이상 유지
+        }
+
+        // 7. 등록
         UnitManager.Instance.RegisterUnit(unit);
         return unit;
     }

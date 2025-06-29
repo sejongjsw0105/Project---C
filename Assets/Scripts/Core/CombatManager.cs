@@ -24,12 +24,12 @@ public class CombatManager : MonoBehaviour
             if (area.areaCondition != AreaCondition.InCombat) continue;
             Unit firstAttacker = area.firstAttacker;
             Unit secondAttacker = area.secondAttacker;
-            if (firstAttacker.isAttackable){
-                firstAttacker.DoAttack(secondAttacker);
+            if (AttackAction.CanExecute(firstAttacker,area)){
+                AttackAction.Execute(firstAttacker, area);
             }
-            if (secondAttacker.isAttackable)
+            if (AttackAction.CanExecute(secondAttacker, area))
             {
-                secondAttacker.DoAttack(firstAttacker);
+                AttackAction.Execute(secondAttacker, area);
             }
         }
     }

@@ -15,7 +15,7 @@ public class SupportContext
     {
         Supporter = supporter;
         TargetArea = target;
-        BaseValue = supporter.attackPower;
+        BaseValue = supporter.stats.attackPower;
         FinalValue = BaseValue;
     }
 
@@ -55,7 +55,7 @@ public class SupportContext
         var target = TargetArea.occupyingEnemyUnit ?? TargetArea.occupyingFriendlyUnit;
         if (target != null)
         {
-            target.Damaged(Supporter, Unit.DamageType.Support, FinalValue);
+            DamageAction.Execute(Supporter, target, DamageType.Support, FinalValue);
         }
     }
 

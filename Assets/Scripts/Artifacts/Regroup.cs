@@ -1,6 +1,5 @@
 using UnityEngine;
 using System.Collections.Generic;
-using System.Linq;
 
 public class Regroup : Artifact
 {
@@ -12,13 +11,26 @@ public class Regroup : Artifact
         {
             id = unit.unitId,
             name = unit.unitName,
-            faction = "Friendly", // 항상 아군화
-            type = unit.unitType.ToString(),
-            maxHealth = unit.stats.maxHealth,
-            attack = unit.stats.attackPower,
-            defense = unit.stats.defensePower,
-            range = unit.stats.range,
-            traits = unit.unitTrait,
+            faction = Faction.Friendly, // 항상 아군화
+            type = unit.unitType,
+            currentHealth = unit.stats.maxHealth, // 최대 체력으로 복원
+            baseStats = new UnitStats
+            {
+                maxHealth = unit.stats.maxHealth,
+                attackPower = unit.stats.attackPower,
+                defensePower = unit.stats.defensePower,
+                range = unit.stats.range
+            },
+            upgradedStats = new UnitStats
+            {
+                maxHealth = unit.upgradedStats.maxHealth,
+                attackPower = unit.upgradedStats.attackPower,
+                defensePower = unit.upgradedStats.defensePower,
+                range = unit.upgradedStats.range
+            },
+            isUpgraded = false,
+            traits = new List<UnitTrait>(unit.unitTrait),
+            statusEffects = new List<StatusEffect>() // 죽었을 때 상태이상은 유지하지 않음
         };
 
         deadUnits.Add(data);

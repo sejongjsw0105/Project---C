@@ -19,13 +19,8 @@ public abstract class Artifact : BaseActionModifier
         }
     }
     public virtual void AreaOnApply(Area area) { }
-
-    public virtual void AreaOnUpdate(Area area) { }
-
-    public virtual void AreaOnExpire(Area area) { }
-
-    public virtual void AreaOnSupport(Area area, Unit supporter, int value)
-    {
-    }
+    public virtual void AreaOnSupport(Area area, Unit supporter, int value) { }
+    public virtual void AreaOnTurnEnd(Area area) { }
+    public virtual void OnNodeClicked(Node node){    }
 
 }

@@ -1,19 +1,18 @@
-// UnitData.cs
 using System;
 using System.Collections.Generic;
+using UnityEngine;
 
 [Serializable]
 public class UnitData
 {
     public int id;
     public string name;
-    public string faction; // "Friendly", "Enemy"
-    public string type;    // "Melee", "Ranged", etc.
-    public int maxHealth;
+    public Faction faction;
+    public UnitType type;
     public int currentHealth;
-    public int attack;
-    public int defense;
-    public int range;
-    public string[] traits; // e.g., ["Fire", "Pressure"]
-    public bool isUpgraded; // true if upgraded, false otherwise
+    public UnitStats baseStats;
+    public UnitStats upgradedStats;
+    public bool isUpgraded;
+    public List<UnitTrait> traits; // MonoBehaviour 기반
+    public List<StatusEffect> statusEffects; // MonoBehaviour 기반
 }

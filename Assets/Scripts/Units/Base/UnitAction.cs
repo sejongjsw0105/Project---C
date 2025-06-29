@@ -55,12 +55,12 @@ public static class AttackAction
 {
     public static bool CanExecute(Unit unit, Area target)
     {
-        return unit.state.CanAttack && target.occupyingEnemyUnit != null;
+        return unit.state.CanAttack && target.GetEnemyOccupant(unit) != null;
     }
 
     public static void Execute(Unit unit, Area target)
     {
-        var context = new AttackContext(unit, target.occupyingEnemyUnit);
+        var context = new AttackContext(unit, target.GetEnemyOccupant(unit));
         context.Resolve();
     }
 }

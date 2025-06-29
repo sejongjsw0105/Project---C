@@ -5,8 +5,8 @@ public class LongReload : UnitTrait
 {
     public LongReload()
     {
-        type = UnitTraitType.Reload;
-        unitTypes = new List<Unit.UnitType> { Unit.UnitType.Ranged, Unit.UnitType.RangedCavalry };
+        traitName = "Long Reload";
+        unitTypes = new List<UnitType> { UnitType.Ranged, UnitType.RangedCavalry };
     }
     public override void OnAfterAttack(Unit attacker, Unit target, int damage)
     {

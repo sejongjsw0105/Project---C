@@ -2,8 +2,8 @@ public class BattleEndState : IBattleState
 {
     public void Enter()
     {
-        foreach (var unit in UnitManager.Instance.allUnits)
-            unit.ToUnitData();
+        //foreach (var unit in UnitManager.Instance.allUnits)
+            //unit.ToUnitData();
     }
 
     public void Exit() { }

@@ -37,8 +37,8 @@ public class DamageContext
     private void ApplyModifiers()
     {
         // 측면 공격 등 특수 상황 처리
-        if (Type == Unit.DamageType.Support &&
-            (Attacker.unitType == Unit.UnitType.Melee || Attacker.unitType == Unit.UnitType.Cavalry) &&
+        if (Type == DamageType.Support &&
+            (Attacker.unitType == UnitType.Melee || Attacker.unitType == UnitType.Cavalry) &&
             GridHelper.Instance.isSide(Attacker.area, Target.area))
         {
             Target.AddStatusEffect(new SideExposed(1));

@@ -5,8 +5,8 @@ public class Reload : UnitTrait
 {
     public Reload()
     {
-        type = UnitTraitType.Reload;
-        unitTypes = new List<Unit.UnitType> { Unit.UnitType.Ranged, Unit.UnitType.RangedCavalry };
+        traitName = "Reload";
+        unitTypes = new List<UnitType> { UnitType.Ranged, UnitType.RangedCavalry };
     }
     public override void OnAfterAttack(Unit attacker, Unit target, int damage)
     {

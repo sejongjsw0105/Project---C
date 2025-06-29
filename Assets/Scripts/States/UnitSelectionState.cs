@@ -5,12 +5,14 @@ public class UnitSelectionState : IBattleState
 
     public void HandleUnitClick(Unit unit)
     {
-        if (BattleManager.Instance.currentAction == Action.Support && unit.GetSupport() == null)
-            return;
-
+        var action = BattleManager.Instance.currentAction;
         BattleManager.Instance.SetCurrentUnit(unit);
 
-        if (BattleManager.Instance.currentAction == Action.Defend)
+        if (action == Action.Support)
+        {
+            BattleManager.Instance.stateMachine.SetState(new AreaSelectionState());
+        }
+        else if (action == Action.Defend)
         {
             BattleManager.Instance.stateMachine.SetState(new DefendState());
         }

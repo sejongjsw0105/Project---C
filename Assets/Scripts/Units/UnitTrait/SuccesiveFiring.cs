@@ -1,18 +1,22 @@
 using UnityEngine;
 using System.Collections.Generic;
+
 public class SuccesiveFiring : UnitTrait
 {
     public SuccesiveFiring()
     {
-        type = UnitTraitType.SuccesiveFiring;
-        unitTypes = new List<Unit.UnitType> { Unit.UnitType.Ranged };
+        traitName = "Succesive Firing";
+        unitTypes = new List<UnitType> { UnitType.Ranged };
     }
+
     public override void OnAfterSupport(Unit supporter, Area area, int value)
     {
-        Unit.Support support = supporter.GetSupport();
-        support.DoSupport(area);
-        BattleManager.Instance.RefundCommandPoints(BattleManager.Instance.GetActionCost(Action.Support));
-        support.DoSupport(area);
-        BattleManager.Instance.RefundCommandPoints(BattleManager.Instance.GetActionCost(Action.Support));
+        var target = area.GetEnemyOccupant(supporter);
+        if (target == null) return;
+
+        for (int i = 0; i < 2; i++)
+        {
+            DamageAction.Execute(supporter, target, DamageType.Support, value);
+        }
     }
 }

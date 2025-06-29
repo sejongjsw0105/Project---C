@@ -9,7 +9,7 @@ public class DefendContext
     public DefendContext(Unit unit)
     {
         Unit = unit;
-        DefenseValue = unit.defensePower;
+        DefenseValue = unit.stats.defensePower;
     }
 
     public void Resolve()

@@ -1,6 +1,6 @@
 using UnityEngine;
 using System.Collections.Generic;
- 
+
 public class Heavy : UnitTrait
 {
     private bool hasMoved = false;
@@ -20,16 +20,26 @@ public class Heavy : UnitTrait
 
     public override ResultContext<int> OnBeforeAttack(Unit attacker, Unit target, int damage)
     {
+        var ctx = new ResultContext<int>(damage);
         if (hasMoved)
-            return new ResultContext<int>(0).Block("Heavy");
-        return new ResultContext<int>(damage);
+            ctx.Block("Heavy");
+        return ctx;
     }
 
     public override ResultContext<int> OnBeforeSupport(Unit supporter, Area area, int value)
     {
+        var ctx = new ResultContext<int>(value);
         if (hasMoved)
-            return new ResultContext<int>(0).Block("Heavy");
-        return new ResultContext<int>(value);
+            ctx.Block("Heavy");
+        return ctx;
+    }
+
+    public override ResultContext<int> OnBeforeMove(Unit unit, Area target, int moveRange)
+    {
+        var ctx = new ResultContext<int>(moveRange);
+        if (hasAttacked)
+            ctx.Block("Heavy");
+        return ctx;
     }
 
     public override void OnAfterAttack(Unit attacker, Unit target, int damage)
@@ -42,13 +52,6 @@ public class Heavy : UnitTrait
         hasAttacked = true;
     }
 
-    public override ResultContext<int> OnBeforeMove(Unit unit, Area target, int moveRange)
-    {
-        if (hasAttacked)
-            return new ResultContext<int>(0).Block("Heavy");
-        return new ResultContext<int>(moveRange);
-    }
-
     public override void OnAfterMove(Unit unit, Area target)
     {
         hasMoved = true;
@@ -56,7 +59,6 @@ public class Heavy : UnitTrait
 
     public override void OnTurnEnd(Unit unit)
     {
-        // 턴 종료 시 초기화
         hasMoved = false;
         hasAttacked = false;
     }

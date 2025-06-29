@@ -34,20 +34,13 @@ public abstract class StatusEffect : BaseActionModifier
         target.statusEffects.Remove(this); // 상태 효과 제거
     }
     public virtual void AreaOnApply(Area area) { }
-
-    public virtual void AreaOnUpdate(Area area) { }
-
     public virtual void AreaOnExpire(Area area) { }
-
     public virtual void AreaOnSupport(Area area, Unit supporter, int value) { }
     public virtual void AreaOnTurnEnd(Area area) { }
-
-
     public virtual void AreaExpire(Area area)
     {
         AreaOnExpire(area);
         area.statusEffects.Remove(this); // 상태 효과 제거
-
     }
 
 }

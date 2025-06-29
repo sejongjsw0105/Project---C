@@ -1,19 +1,22 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
+using System;
+[Serializable]
 public enum DamageType
 {
     Support,
     Damage,
     Debuff,
 }
+[Serializable]
 public enum Faction
 {
     Friendly,   // 우리 진영  
     Enemy,       // 적 진영  
     Neutral      // 중립 진영  
 }
-
+[Serializable]
 public enum UnitType
 {
     Melee,       // 보병  
@@ -21,6 +24,7 @@ public enum UnitType
     Ranged,         // 원거리  
     RangedCavalry,   // 원거리 기병  
 }
+[Serializable]
 public class UnitStats
 {
     public int maxHealth;
@@ -30,6 +34,7 @@ public class UnitStats
 }
 public abstract class Unit : MonoBehaviour
 {
+    public UnitData unitData; // 유닛 데이터
     public UnitState state = new UnitState();
     public UnitStats stats;
     public UnitStats upgradedStats;
@@ -40,6 +45,7 @@ public abstract class Unit : MonoBehaviour
     public Faction faction;
     public List<UnitTrait> unitTrait = new();
     public List<StatusEffect> statusEffects = new();
+    public int unitId;
     public T GetStatusEffect<T>() where T : StatusEffect
     {
         return statusEffects.FirstOrDefault(e => e is T) as T;
@@ -55,7 +61,7 @@ public abstract class Unit : MonoBehaviour
 
     private void OnMouseDown()
     {
-        BattleManager.Instance.HandleUnitClick(this);
+        BattleManager.Instance.stateMachine.CurrentState.HandleUnitClick(this);
     }
 
     public void BeginBattle()
@@ -82,7 +88,7 @@ public abstract class Unit : MonoBehaviour
     public void Die()
     {
         UnitManager.Instance.UnregisterUnit(this);
-        area.ClearUnit(this);
+        area.RemoveOccupant(this);
         foreach (var x in statusEffects) x.OnDie(this);
         foreach (var x in unitTrait) x.OnDie(this);
         foreach (var x in GameContext.Instance.myArtifacts) x.OnDie(this);
