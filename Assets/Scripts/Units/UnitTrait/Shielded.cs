@@ -8,7 +8,7 @@ public class Shielded : UnitTrait
         traitName = "Shielded";
         unitTypes = new List<UnitType> { UnitType.Melee, UnitType.Cavalry};
     }
-    public override ResultContext<int> OnBeforeDamaged(Unit from, Unit target, DamageType damageType, int damage)
+    public override ResultContext<int> OnBeforeDamaged(IUnit from, IUnit target, DamageType damageType, int damage)
     {
         var context = new ResultContext<int>(damage);
         if (damageType == DamageType.Support && (from.unitType == UnitType.Ranged && from.unitType == UnitType.RangedCavalry))

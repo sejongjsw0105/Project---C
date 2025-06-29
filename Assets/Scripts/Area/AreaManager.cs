@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using UnityEditorInternal;
 using UnityEngine;
 
 public class AreaManager : MonoBehaviour
@@ -22,7 +21,6 @@ public class AreaManager : MonoBehaviour
             }
         }
         areaGrid = new Area[width, height];
-        Debug.Log("[ClearAllAreas] 모든 영역을 초기화했습니다.");
     }
     public void BeginBattle()
     {
@@ -36,7 +34,6 @@ public class AreaManager : MonoBehaviour
     {
         if (x < 0 || x >= width || y < 0 || y >= height)
         {
-            Debug.LogWarning($"[GetArea] 좌표 ({x},{y})가 유효 범위를 벗어남");
             return null;
         }
         return  areaGrid[x, y];
@@ -51,11 +48,9 @@ public class AreaManager : MonoBehaviour
             {
                 allAreas.Add(area);
             }
-            Debug.Log($"[RegisterArea] ({x},{y}) 영역 등록됨");
         }
         else
         {
-            Debug.LogWarning($"[RegisterArea] 잘못된 좌표: ({x},{y})");
         }
     }
 

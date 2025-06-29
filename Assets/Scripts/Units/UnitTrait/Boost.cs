@@ -15,10 +15,10 @@ public class Boost : UnitTrait
             UnitType.Cavalry
         };
     }
-    public override void OnTurnEnd(Unit from)
+    public override void OnTurnEnd(IUnit from)
     {
-        List<Unit> units = GridHelper.Instance.GetAdjacentUnits(from);
-        foreach (Unit unit in units)
+        List<IUnit> units = GridHelper.Instance.GetAdjacentUnits(from);
+        foreach (IUnit unit in units)
         {
             if (unit != null && unit.unitType == from.unitType)
             {

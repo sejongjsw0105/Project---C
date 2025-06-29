@@ -5,7 +5,7 @@ public class Regroup : Artifact
 {
     public List<UnitData> deadUnits = new();
 
-    public override void OnDie(Unit unit)
+    public override void OnDie(IUnit unit)
     {
         UnitData data = new UnitData
         {

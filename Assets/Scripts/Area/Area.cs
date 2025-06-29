@@ -20,19 +20,19 @@ public enum AreaType
     EnemyFinal
 }
 
-public class Area : MonoBehaviour
+public class Area : MonoBehaviour, IArea
 {
-    public Unit firstAttacker;
-    public Unit secondAttacker;
-    public int areaIndexX;
-    public int areaIndexY;
-    public AreaType areaType;
-    public Unit occupyingFriendlyUnit;
-    public Unit occupyingEnemyUnit;
-    public AreaCondition areaCondition;
-
-    public List<StatusEffect> statusEffects = new List<StatusEffect>();
-
+    public int areaIndexX { get; set; }
+    public int areaIndexY { get; set; }
+    public IUnit firstAttacker { get; set; }
+    public IUnit secondAttacker { get; set; }
+    public AreaType areaType { get; set; }
+    public AreaCondition areaCondition { get; set; }
+    public IUnit occupyingFriendlyUnit { get; set; }
+    public IUnit occupyingEnemyUnit { get; set; }
+    public float captureScore { get; set; } = 50f;
+    public float combatScore { get; set; } = 30f;
+    public List<StatusEffect> statusEffects { get; set; } = new List<StatusEffect>();
     private void Start()
     {
         if (AreaManager.Instance != null)
@@ -129,7 +129,7 @@ public class Area : MonoBehaviour
         }
     }
 
-    public Unit GetAllyOccupant(Unit reference)
+    public IUnit GetAllyOccupant(IUnit reference)
     {
         return reference.faction switch
         {
@@ -139,7 +139,7 @@ public class Area : MonoBehaviour
         };
     }
 
-    public Unit GetEnemyOccupant(Unit reference)
+    public IUnit GetEnemyOccupant(IUnit reference)
     {
         return reference.faction switch
         {
@@ -148,7 +148,7 @@ public class Area : MonoBehaviour
             _ => null
         };
     }
-    public void RemoveOccupant(Unit unit)
+    public void RemoveOccupant(IUnit unit)
     {
         if (unit == occupyingFriendlyUnit)
         {

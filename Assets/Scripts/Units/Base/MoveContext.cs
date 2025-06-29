@@ -2,9 +2,9 @@ using System.Linq;
 
 public class MoveContext
 {
-    public Unit Unit { get; private set; }
-    public Area From { get; private set; }
-    public Area To { get; private set; }
+    public IUnit Unit { get; private set; }
+    public IArea From { get; private set; }
+    public IArea To { get; private set; }
 
     public int BaseMoveRange { get; private set; }
     public int FinalMoveRange { get; private set; }
@@ -12,7 +12,7 @@ public class MoveContext
     public bool IsBlocked { get; private set; } = false;
     public string BlockedBy { get; private set; } = null;
 
-    public MoveContext(Unit unit, Area to, int baseMoveRange = 1)
+    public MoveContext(IUnit unit, IArea to, int baseMoveRange = 1)
     {
         Unit = unit;
         From = unit.area;
@@ -60,8 +60,10 @@ public class MoveContext
     private void DoMove()
     {
         From.occupyingFriendlyUnit = null;
-
-        Unit.transform.position = To.transform.position;
+        if (Unit is Unit u && To is Area a)
+        {
+            u.transform.position = a.transform.position;
+        }
         Unit.area = To;
         To.occupyingFriendlyUnit = Unit;
         To.UpdateAreaCondition();

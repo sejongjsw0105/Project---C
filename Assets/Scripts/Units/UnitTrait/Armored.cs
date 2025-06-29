@@ -8,7 +8,7 @@ public class Armored : UnitTrait
         traitName = "Armored";
         unitTypes = new List<UnitType> { UnitType.Melee, UnitType.Cavalry };
     }
-    public override void OnTurnEnd(Unit from)
+    public override void OnTurnEnd(IUnit from)
     {
         from.AddStatusEffect(new Protected());
     }

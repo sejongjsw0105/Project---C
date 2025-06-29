@@ -4,18 +4,19 @@ using UnityEngine;
 public class Defeated : StatusEffect
 {
     public Defeated()
-        : base("Defeated", StackType.value, 1000, 1)
+        : base("Defeated", StackType.value, EffectType.Debuff, 1000, 1)
     {
+        isPersistent = true; // 이 상태 효과는 지속적입니다.
     }
 
-    public override void OnApply(Unit target)
+    public override void OnApply(IUnit target)
     {
         target.stats.attackPower /= 2;
         target.stats.defensePower /= 2;
         target.stats.maxHealth /= 2;
     }
 
-    public override void OnLose(Unit unit)
+    public override void OnLose(IUnit unit)
     {
         var defeated = unit.GetStatusEffect<Defeated>();
         if (defeated != null && defeated.value >= 2)
@@ -24,7 +25,7 @@ public class Defeated : StatusEffect
         }
     }
 
-    public override void OnWin(Unit unit)
+    public override void OnWin(IUnit unit)
     {
         Expire(unit); 
     }

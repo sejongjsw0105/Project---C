@@ -6,7 +6,7 @@ public class GunPowder : Artifact
     {
         artifactName = "GunPowder";
     }
-    public override ResultContext<int> OnBeforeAttack(Unit attacker, Unit target, int damage)
+    public override ResultContext<int> OnBeforeAttack(IUnit attacker, IUnit target, int damage)
     {
         var context = new ResultContext<int>(damage);
 

@@ -15,66 +15,59 @@ public class GridHelper : MonoBehaviour
         }
         Instance = this;
     }
-    public bool isSide(Area from, Area to)
+    public bool isSide(IArea from, IArea to)
     {
         int dx = Mathf.Abs(from.areaIndexX - to.areaIndexX);
         if (dx != 0) return true; // x축이 있으면 측면
         else return false;
     }
-    public bool IsFriendlyMoveAllowed(Area from, Area to, int moveRange = 1)
-    {
-        if (from == to) return false;
-        // 대상 칸이 이미 점령됨 → 불가
-        if (to.occupyingFriendlyUnit != null)
-            return false;
 
+    public bool IsMoveAllowed(IUnit unit, IArea to, int moveRange = 1)
+    {
+        if (unit == null || unit.area == null || to == null) return false;
+        if (unit.area == to) return false;
+
+        var from = unit.area;
         int dx = Mathf.Abs(from.areaIndexX - to.areaIndexX);
         int dy = Mathf.Abs(from.areaIndexY - to.areaIndexY);
 
-        // 최후방 → 후방 이동은 자유 (단, moveRange 이하)
-        if (from.areaType == AreaType.FriendlyFinal)
-        {
-            return to.areaType == AreaType.FriendlyRear && dx <= moveRange;
-        }
+        // 같은 진영 유닛이 있다면 이동 불가
+        var occupying = (unit.faction == Faction.Friendly) ? to.occupyingFriendlyUnit : to.occupyingEnemyUnit;
+        if (occupying != null)
+            return false;
 
-        // 후방 또는 전방 → 위/아래 한 칸 이동만 허용
-        if (from.areaType == AreaType.FriendlyRear || from.areaType == AreaType.Frontline)
+        // 진영별 영역 이동 규칙
+        bool isFriendly = unit.faction == Faction.Friendly;
+        AreaType fromType = from.areaType;
+        AreaType toType = to.areaType;
+
+        if (isFriendly)
         {
-            return dx == 0 && dy == 1;
+            if (fromType == AreaType.FriendlyFinal)
+                return toType == AreaType.FriendlyRear && dx <= moveRange;
+            if (fromType == AreaType.FriendlyRear || fromType == AreaType.Frontline)
+                return dx == 0 && dy == 1;
+        }
+        else
+        {
+            if (fromType == AreaType.EnemyFinal)
+                return toType == AreaType.EnemyRear && dx <= moveRange;
+            if (fromType == AreaType.EnemyRear || fromType == AreaType.Frontline)
+                return dx == 0 && dy == 1;
         }
 
         return false;
     }
-    public bool IsEnemyMoveAllowed(Area from, Area to, int moveRange = 1)
-    {
-        if (from == to) return false;
-        // 대상 칸이 이미 점령됨 → 불가
-        if (to.occupyingEnemyUnit != null)
-            return false;
-        int dx = Mathf.Abs(from.areaIndexX - to.areaIndexX);
-        int dy = Mathf.Abs(from.areaIndexY - to.areaIndexY);
-        // 최후방 → 후방 이동은 자유 (단, moveRange 이하)
-        if (from.areaType == AreaType.EnemyFinal)
-        {
-            return to.areaType == AreaType.EnemyRear && dx <= moveRange;
-        }
-        // 후방 또는 전방 → 위/아래 한 칸 이동만 허용
-        if (from.areaType == AreaType.EnemyRear || from.areaType == AreaType.Frontline)
-        {
-            return dx == 0 && dy == 1;
-        }
-        return false;
-    }
 
-    public bool IsInRange(Area from, Area to, int range)
+    public bool IsInRange(IArea from, IArea to, int range)
     {
         int dx = Mathf.Abs(from.areaIndexX - to.areaIndexX);
         int dy = Mathf.Abs(from.areaIndexY - to.areaIndexY);
         return Mathf.Max(dx + dy) <= range;
     }
-    public List<Unit> GetAdjacentUnits(Unit centerUnit)
+    public List<IUnit> GetAdjacentUnits(IUnit centerUnit)
     {
-        List<Unit> adjacentUnits = new List<Unit>();
+        List<IUnit> adjacentUnits = new List<IUnit>();
         var area = centerUnit.area;
         if (area == null) return adjacentUnits;
 
@@ -93,10 +86,10 @@ public class GridHelper : MonoBehaviour
             int nx = x + directions[i, 0];
             int ny = y + directions[i, 1];
 
-            Area neighbor = AreaManager.Instance.GetArea(nx, ny);
+            IArea neighbor = AreaManager.Instance.GetArea(nx, ny);
             if (neighbor == null) continue;
 
-            Unit u = neighbor.occupyingFriendlyUnit ?? neighbor.occupyingEnemyUnit;
+            IUnit u = neighbor.occupyingFriendlyUnit ?? neighbor.occupyingEnemyUnit;
             if (u != null)
             {
                 adjacentUnits.Add(u);

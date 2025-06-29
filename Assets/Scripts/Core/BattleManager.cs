@@ -1,13 +1,12 @@
 using UnityEngine;
-using static UnityEditor.VersionControl.Asset;
 using System.Collections;
 
 public class BattleManager : MonoBehaviour
 {
     public static BattleManager Instance;
 
-    public Unit currentUnit;
-    public Area currentArea;
+    public IUnit currentUnit;
+    public IArea currentArea;
     public Action currentAction;
 
     public int turnCount = 0;
@@ -32,16 +31,16 @@ public class BattleManager : MonoBehaviour
 
     private void Start()
     {
-        if (GameContext.Instance.nextEnemyPlan != null)
-            GameContext.Instance.nextEnemyPlan.Spawn();
+        //if (GameContext.Instance.nextEnemyPlan != null)
+            //GameContext.Instance.nextEnemyPlan.Spawn();
 
         stateMachine.SetState(new BattleStartState());
     }
-    public void SetCurrentUnit(Unit unit)
+    public void SetCurrentUnit(IUnit unit)
     {
         currentUnit = unit;
     }
-    public void SetCurrentArea(Area area)
+    public void SetCurrentArea(IArea area)
     {
         currentArea = area;
     }
@@ -94,7 +93,7 @@ public class BattleManager : MonoBehaviour
         bool anyFriendlyAlive = false;
         bool anyEnemyAlive = false;
 
-        foreach (Unit unit in UnitManager.Instance.allUnits)
+        foreach (IUnit unit in UnitManager.Instance.allUnits)
         {
             if (unit.currentHealth <= 0) continue;
 
@@ -107,7 +106,7 @@ public class BattleManager : MonoBehaviour
         if (!anyEnemyAlive)
         {
             battleEndReason = BattleEndReason.AllEnemiesDefeated;
-            foreach (Unit unit in UnitManager.Instance.GetUnitsByFaction(Faction.Friendly))
+            foreach (IUnit unit in UnitManager.Instance.GetUnitsByFaction(Faction.Friendly))
             {
                 unit.Win();
             }
@@ -118,7 +117,7 @@ public class BattleManager : MonoBehaviour
         else if (!anyFriendlyAlive)
         {
             battleEndReason = BattleEndReason.AllFriendliesDefeated;
-            foreach (Unit unit in UnitManager.Instance.GetUnitsByFaction(Faction.Friendly))
+            foreach (IUnit unit in UnitManager.Instance.GetUnitsByFaction(Faction.Friendly))
             {
                 unit.Lose();
             }
@@ -128,7 +127,7 @@ public class BattleManager : MonoBehaviour
         else if(turnCount >= maxTurnCount)
         {
             battleEndReason = BattleEndReason.TurnLimitReached;
-            foreach (Unit unit in UnitManager.Instance.GetUnitsByFaction(Faction.Friendly))
+            foreach (IUnit unit in UnitManager.Instance.GetUnitsByFaction(Faction.Friendly))
             {
                 unit.Lose();
             }

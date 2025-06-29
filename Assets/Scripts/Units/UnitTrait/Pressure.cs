@@ -15,14 +15,14 @@ public class Pressure : UnitTrait
         };
     }
 
-    public override void OnAfterAttack(Unit attacker, Unit target, int damage)
+    public override void OnAfterAttack(IUnit attacker, IUnit target, int damage)
     {
         TryPressure(target);
     }
 
-    public override void OnAfterSupport(Unit supporter, Area area, int value)
+    public override void OnAfterSupport(IUnit supporter, IArea area, int value)
     {
-        Unit target = supporter.faction switch
+        IUnit target = supporter.faction switch
         {
             Faction.Friendly => area.occupyingEnemyUnit,
             Faction.Enemy => area.occupyingFriendlyUnit,
@@ -32,7 +32,7 @@ public class Pressure : UnitTrait
         TryPressure(target);
     }
 
-    private void TryPressure(Unit target)
+    private void TryPressure(IUnit target)
     {
         if (target == null || target.stats == null || target.area == null) return;
 
@@ -48,8 +48,8 @@ public class Pressure : UnitTrait
 
         bool canMove = target.faction switch
         {
-            Faction.Friendly => GridHelper.Instance.IsFriendlyMoveAllowed(target.area, retreatArea),
-            Faction.Enemy => GridHelper.Instance.IsEnemyMoveAllowed(target.area, retreatArea),
+            Faction.Friendly => GridHelper.Instance.IsMoveAllowed(target, retreatArea),
+            Faction.Enemy => GridHelper.Instance.IsMoveAllowed(target, retreatArea),
             _ => false
         };
 
@@ -57,7 +57,5 @@ public class Pressure : UnitTrait
 
         var moveContext = new MoveContext(target, retreatArea);
         moveContext.Resolve();
-
-        Debug.Log($"[Pressure] {target.unitName}이 압박으로 인해 후퇴했습니다!");
     }
 }

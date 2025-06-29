@@ -6,13 +6,14 @@ public class GameContext : MonoBehaviour
     public int Gold;
     public Node currentNode;
     public static GameContext Instance { get; private set; }
+    public int maxCommandPoints = 4; 
     public string commanederName; // Commander name
     public List<UnitData> myUnitDataList = new();
     public List<Artifact> myArtifacts = new List<Artifact>();
-    public FriendlyArmyState armyState = new FriendlyArmyState();
-    public EnemySpawnPlan nextEnemyPlan = null;
+    //public FriendlyArmyState armyState = new FriendlyArmyState();
+    //public EnemySpawnPlan nextEnemyPlan = null;
     public List<string> chosenEvents = new();
-    public List<Unit> deadUnits = new();
+    public List<IUnit> deadUnits = new();
     public void setCurrentNode(Node node)
     {
         if (node == null)

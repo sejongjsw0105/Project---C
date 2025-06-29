@@ -2,8 +2,8 @@ using System.Linq;
 
 public class SupportContext
 {
-    public Unit Supporter { get; private set; }
-    public Area TargetArea { get; private set; }
+    public IUnit Supporter { get; private set; }
+    public IArea TargetArea { get; private set; }
 
     public int BaseValue { get; private set; }
     public int FinalValue { get; private set; }
@@ -11,7 +11,7 @@ public class SupportContext
     public bool IsBlocked { get; private set; }
     public string BlockedBy { get; private set; }
 
-    public SupportContext(Unit supporter, Area target)
+    public SupportContext(IUnit supporter, IArea target)
     {
         Supporter = supporter;
         TargetArea = target;

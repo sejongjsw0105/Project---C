@@ -2,11 +2,11 @@ using System.Linq;
 
 public class DefendContext
 {
-    public Unit Unit { get; private set; }
+    public IUnit Unit { get; private set; }
 
     public int DefenseValue { get; private set; }
 
-    public DefendContext(Unit unit)
+    public DefendContext(IUnit unit)
     {
         Unit = unit;
         DefenseValue = unit.stats.defensePower;

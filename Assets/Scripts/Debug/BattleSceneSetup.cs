@@ -8,7 +8,7 @@ public class BattleSceneSetup : MonoBehaviour
 
     private void Awake()
     {
-        GameContext.Instance.nextEnemyPlan = new EnemySpawnPlan
+        /*GameContext.Instance.nextEnemyPlan = new EnemySpawnPlan
         {
             units = new List<EnemySpawnPlan.EnemyUnitEntry>
             {
@@ -23,6 +23,6 @@ public class BattleSceneSetup : MonoBehaviour
                     spawnPosition = new Vector2Int(0, 3)
                 }
             }
-        };
+        };*/
     }
 }

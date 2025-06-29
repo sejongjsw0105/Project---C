@@ -4,15 +4,15 @@ using System.Linq;
 
 public class Surprise : UnitTrait
 {
-    private Area lastSurprisedArea = null;
-    private Unit lastSurprised = null;
+    private IArea lastSurprisedArea = null;
+    private IUnit lastSurprised = null;
 
     public Surprise()
     {
         unitTypes = new List<UnitType> { UnitType.Melee, UnitType.Cavalry };
     }
 
-    public override ResultContext<int> OnBeforeAttack(Unit attacker, Unit target, int damage)
+    public override ResultContext<int> OnBeforeAttack(IUnit attacker, IUnit target, int damage)
     {
         var result = new ResultContext<int>(damage);
 
@@ -31,7 +31,7 @@ public class Surprise : UnitTrait
         return result; // 데미지 변경 없음, 차단 아님
     }
 
-    public override void OnTurnEnd(Unit unit)
+    public override void OnTurnEnd(IUnit unit)
     {
         // 기습 상태 리셋: 타겟이 자리를 이동하거나 사라짐
         if (lastSurprised == null || lastSurprised.area != lastSurprisedArea)

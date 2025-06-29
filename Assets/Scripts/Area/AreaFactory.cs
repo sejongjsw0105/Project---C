@@ -10,7 +10,6 @@ public class AreaFactory : MonoBehaviour
         GameObject prefab = Resources.Load<GameObject>("BaseArea");
         if (prefab == null)
         {
-            Debug.LogError("BaseArea prefab not found in Resources.");
             return;
         }
 

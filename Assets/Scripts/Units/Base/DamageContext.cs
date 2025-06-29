@@ -2,8 +2,8 @@ using System.Linq;
 
 public class DamageContext
 {
-    public Unit Attacker { get; private set; }
-    public Unit Target { get; private set; }
+    public IUnit Attacker { get; private set; }
+    public IUnit Target { get; private set; }
     public DamageType Type { get; private set; }
 
     public int BaseDamage { get; private set; }
@@ -12,7 +12,7 @@ public class DamageContext
     public bool IsBlocked { get; private set; } = false;
     public string BlockedBy { get; private set; } = null;
 
-    public DamageContext(Unit attacker, Unit target, DamageType type, int baseDamage)
+    public DamageContext(IUnit attacker, IUnit target, DamageType type, int baseDamage)
     {
         Attacker = attacker;
         Target = target;

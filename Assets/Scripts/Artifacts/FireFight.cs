@@ -6,7 +6,7 @@ public class FireFight : Artifact
     {
         artifactName = "FireFight";
     }
-    public override ResultContext<int> OnBeforeAttack(Unit attacker, Unit target, int damage)
+    public override ResultContext<int> OnBeforeAttack(IUnit attacker, IUnit target, int damage)
     {
         var context = new ResultContext<int>(damage);
         if (attacker.unitType == UnitType.Ranged)

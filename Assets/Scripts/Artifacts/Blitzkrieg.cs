@@ -6,7 +6,7 @@ public class Blitzkrieg : Artifact
     {
         artifactName = "Blitzkrieg";
     }
-    public override void OnAfterMove(Unit unit, Area target)
+    public override void OnAfterMove(IUnit unit, IArea target)
     {
         unit.state.CanMove= true;
     }

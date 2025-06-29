@@ -14,11 +14,11 @@ public class Cover : UnitTrait
             UnitType.RangedCavalry
         };
     }
-    public override ResultContext<int> OnBeforeSupport(Unit supporter, Area area, int value)
+    public override ResultContext<int> OnBeforeSupport(IUnit supporter, IArea area, int value)
     {
         var result = new ResultContext<int>(value);
 
-        Unit target = area.GetAllyOccupant(supporter);
+        IUnit target = area.GetAllyOccupant(supporter);
 
         if (target == null)
         {

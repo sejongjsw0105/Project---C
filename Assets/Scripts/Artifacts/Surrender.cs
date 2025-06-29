@@ -7,7 +7,7 @@ public class Surrender : Artifact
     {
         artifactName = "Surrender";
     }
-    public override void OnAfterDamaged(Unit from, Unit target, DamageType damageType, int damage)
+    public override void OnAfterDamaged(IUnit from, IUnit target, DamageType damageType, int damage)
     {
         if (target.faction == Faction.Enemy)
         {

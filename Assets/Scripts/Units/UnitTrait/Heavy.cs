@@ -18,7 +18,7 @@ public class Heavy : UnitTrait
         };
     }
 
-    public override ResultContext<int> OnBeforeAttack(Unit attacker, Unit target, int damage)
+    public override ResultContext<int> OnBeforeAttack(IUnit attacker, IUnit target, int damage)
     {
         var ctx = new ResultContext<int>(damage);
         if (hasMoved)
@@ -26,7 +26,7 @@ public class Heavy : UnitTrait
         return ctx;
     }
 
-    public override ResultContext<int> OnBeforeSupport(Unit supporter, Area area, int value)
+    public override ResultContext<int> OnBeforeSupport(IUnit supporter, IArea area, int value)
     {
         var ctx = new ResultContext<int>(value);
         if (hasMoved)
@@ -34,7 +34,7 @@ public class Heavy : UnitTrait
         return ctx;
     }
 
-    public override ResultContext<int> OnBeforeMove(Unit unit, Area target, int moveRange)
+    public override ResultContext<int> OnBeforeMove(IUnit unit, IArea target, int moveRange)
     {
         var ctx = new ResultContext<int>(moveRange);
         if (hasAttacked)
@@ -42,22 +42,22 @@ public class Heavy : UnitTrait
         return ctx;
     }
 
-    public override void OnAfterAttack(Unit attacker, Unit target, int damage)
+    public override void OnAfterAttack(IUnit attacker, IUnit target, int damage)
     {
         hasAttacked = true;
     }
 
-    public override void OnAfterSupport(Unit supporter, Area area, int value)
+    public override void OnAfterSupport(IUnit supporter, IArea area, int value)
     {
         hasAttacked = true;
     }
 
-    public override void OnAfterMove(Unit unit, Area target)
+    public override void OnAfterMove(IUnit unit, IArea target)
     {
         hasMoved = true;
     }
 
-    public override void OnTurnEnd(Unit unit)
+    public override void OnTurnEnd(IUnit unit)
     {
         hasMoved = false;
         hasAttacked = false;

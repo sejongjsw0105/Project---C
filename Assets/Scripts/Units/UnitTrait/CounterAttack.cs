@@ -8,7 +8,7 @@ public class CounterAttack : UnitTrait
         unitTypes = new List<UnitType> { UnitType.Melee};
 
     }
-    public override void OnAfterDamaged(Unit from, Unit target, DamageType damageType, int damage)
+    public override void OnAfterDamaged(IUnit from, IUnit target, DamageType damageType, int damage)
     {
         if (damageType == DamageType.Support && (from.unitType == UnitType.Melee || from.unitType ==UnitType.Cavalry))
         {

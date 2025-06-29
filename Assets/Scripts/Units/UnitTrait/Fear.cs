@@ -10,7 +10,7 @@ public class Fear : UnitTrait
 
     }
 
-    public override void OnAfterAttack(Unit attacker, Unit target, int damage)
+    public override void OnAfterAttack(IUnit attacker, IUnit target, int damage)
     {
         if (target == null) return;
 

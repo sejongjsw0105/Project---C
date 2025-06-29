@@ -17,20 +17,13 @@ public class CombatManager : MonoBehaviour
     }
     public void Combat()
     {
-        Debug.Log("전투가 시작되었습니다.");
-
         foreach (var area in AreaManager.Instance.allAreas)
         {
             if (area.areaCondition != AreaCondition.InCombat) continue;
-            Unit firstAttacker = area.firstAttacker;
-            Unit secondAttacker = area.secondAttacker;
-            if (AttackAction.CanExecute(firstAttacker,area)){
-                AttackAction.Execute(firstAttacker, area);
-            }
-            if (AttackAction.CanExecute(secondAttacker, area))
-            {
-                AttackAction.Execute(secondAttacker, area);
-            }
+            IUnit firstAttacker = area.firstAttacker;
+            IUnit secondAttacker = area.secondAttacker;
+            AttackAction.Execute(firstAttacker, area);
+            AttackAction.Execute(secondAttacker, area);
         }
     }
 }

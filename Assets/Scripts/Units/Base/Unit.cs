@@ -14,7 +14,10 @@ public enum Faction
 {
     Friendly,   // 우리 진영  
     Enemy,       // 적 진영  
-    Neutral      // 중립 진영  
+    Neutral,      // 중립 진영  
+    All,
+    Other,
+    Same
 }
 [Serializable]
 public enum UnitType
@@ -32,20 +35,23 @@ public class UnitStats
     public int defensePower;
     public int range;
 }
-public abstract class Unit : MonoBehaviour
+public abstract class Unit : MonoBehaviour, IUnit
 {
-    public UnitData unitData; // 유닛 데이터
-    public UnitState state = new UnitState();
-    public UnitStats stats;
-    public UnitStats upgradedStats;
-    public Area area;
-    public int currentHealth;
-    public string unitName;
-    public UnitType unitType;
-    public Faction faction;
-    public List<UnitTrait> unitTrait = new();
-    public List<StatusEffect> statusEffects = new();
-    public int unitId;
+    public UnitData unitData { get; set; } // 유닛 데이터
+    public UnitState state { get; set; } = new UnitState();
+    public UnitStats stats { get; set; }
+    public UnitStats upgradedStats { get; set; }
+    public IArea area { get; set; }
+    public float unitPriority { get; set; } = 1.0f; // 유닛 우선순위
+    public int currentHealth { get; set; }
+    public string unitName { get; set; }
+    public UnitType unitType { get; set; }
+    public Faction faction { get; set; }
+    public List<UnitTrait> unitTrait { get; set; } = new();
+    public List<StatusEffect> statusEffects { get; set; } = new();
+    public int unitId { get; set; }
+    public Faction supportableFaction { get; set; } = Faction.Other; // 예: Friendly 유닛만 지원 가능
+
     public T GetStatusEffect<T>() where T : StatusEffect
     {
         return statusEffects.FirstOrDefault(e => e is T) as T;
@@ -152,4 +158,16 @@ public abstract class Unit : MonoBehaviour
     {
         statusEffects.Add(newEffect);
     }
+    public void UpdateUnitDataFromBattle()
+    {
+        if (unitData == null)
+            return;
+
+        unitData.currentHealth = currentHealth;
+
+        unitData.statusEffects = statusEffects
+            .Where(e => e.isPersistent) // 스테이지 지속 효과만 저장
+            .ToList();
+    }
+
 }

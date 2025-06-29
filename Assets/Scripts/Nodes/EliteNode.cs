@@ -3,7 +3,7 @@ using UnityEngine;
 
 public class EliteNode : Node
 {
-    public EnemySpawnPlan enemySpawnPlan; // 적 스폰 계획
+    //public EnemySpawnPlan enemySpawnPlan; // 적 스폰 계획
     public int rewardGold;           // 전투 보상 (골드)
     public List<Unit> rewardUnits; // 전투 보상 (유닛들)
     //public List<Artifact> rewardArtifacts; // 전투 보상 (유물들)

@@ -7,7 +7,7 @@ public class CloseRangeShooting : UnitTrait
         traitName = "Close Range Shooting";
         unitTypes = new List<UnitType> { UnitType.Ranged, UnitType.RangedCavalry };
     }
-    public override void OnApply(Unit unit)
+    public override void OnApply(IUnit unit)
     {
         unit.state.CanAttack = true;
     }

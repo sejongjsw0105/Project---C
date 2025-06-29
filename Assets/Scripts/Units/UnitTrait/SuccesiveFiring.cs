@@ -9,7 +9,7 @@ public class SuccesiveFiring : UnitTrait
         unitTypes = new List<UnitType> { UnitType.Ranged };
     }
 
-    public override void OnAfterSupport(Unit supporter, Area area, int value)
+    public override void OnAfterSupport(IUnit supporter, IArea area, int value)
     {
         var target = area.GetEnemyOccupant(supporter);
         if (target == null) return;
