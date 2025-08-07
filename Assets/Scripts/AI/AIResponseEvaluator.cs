@@ -82,7 +82,7 @@ public static class AIResponseEvaluator
 
             foreach (var plan in plans)
             {
-                int cost = BattleManager.Instance.GetActionCost(plan.action);
+                int cost = ActionCostCalculator.GetCost(plan.action);
                 if (cost > remainingCP) continue;
 
                 // 상태 복제

@@ -2,7 +2,7 @@ public class ActionSelectionState : IBattleState
 {
     public void Enter()
     {
-        BattleManager.Instance.SetCurrentAction(Action.None);
+        BattleManager.Selection.SetAction(Action.None);
     }
 
     public void Exit() { }
